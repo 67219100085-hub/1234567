@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เที่ยวพัทลุง | เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม</title>
+
+<!-- ===== Google Font: Prompt ===== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ===== Leaflet (แผนที่ OpenStreetMap ใช้งานได้จริง ไม่ต้องมี API Key) ===== -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+/* ============================================================
+   🎨 DESIGN TOKENS — โทนสีธรรมชาติตาม Mockup
+   ============================================================ */
+:root{
+  --green-dark:   #1b4332;
+  --green-mid:    #2d6a4f;
+  --green-light:  #52b788;
+  --green-pale:   #d8f3dc;
+  --green-bg:     #eef5f0;
+  --white:        #ffffff;
+  --gray-bg:      #f6f7f6;
+  --gray-line:    #e3e7e4;
+  --text-main:    #22302a;
+  --text-sub:     #6b7a72;
+  --star:         #f4a52a;
+  --danger:       #d64545;
+  --radius:       14px;
+  --shadow:       0 4px 18px rgba(27,67,50,.10);
+  --shadow-lg:    0 10px 30px rgba(27,67,50,.16);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Prompt',sans-serif;color:var(--text-main);background:var(--gray-bg);min-height:100vh;display:flex;flex-direction:column}
+img{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer;border:none}
+input,select,textarea{font-family:inherit;font-size:1rem}
+a{text-decoration:none;color:inherit}
+
+/* ============ 🧭 NAVBAR ============ */
+.navbar{position:sticky;top:0;z-index:100;background:var(--white);box-shadow:0 2px 10px rgba(27,67,50,.08)}
+.nav-inner{max-width:1180px;margin:0 auto;padding:.65rem 1.25rem;display:flex;align-items:center;gap:1.25rem}
+.brand{display:flex;align-items:center;gap:.6rem;cursor:pointer}
+.brand-logo{width:44px;height:44px;border-radius:12px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.brand-text .brand-name{font-weight:700;color:var(--green-dark);font-size:1.1rem;line-height:1.2}
+.brand-text .brand-sub{font-size:.68rem;color:var(--text-sub)}
+.nav-links{display:flex;gap:1.4rem;margin-left:auto;align-items:center}
+.nav-links a{font-size:.92rem;color:var(--text-main);font-weight:500;position:relative;padding:.3rem 0}
+.nav-links a:hover,.nav-links a.active{color:var(--green-light)}
+.nav-links a.active::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:3px;border-radius:3px;background:var(--green-light)}
+.nav-actions{display:flex;align-items:center;gap:.6rem}
+.icon-btn{width:40px;height:40px;border-radius:50%;background:transparent;display:flex;align-items:center;justify-content:center;font-size:1.05rem;transition:background .2s}
+.icon-btn:hover{background:var(--green-bg)}
+.btn{padding:.55rem 1.25rem;border-radius:999px;font-weight:600;font-size:.9rem;transition:transform .15s, box-shadow .15s, background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--green-dark);color:#fff}
+.btn-primary:hover{background:var(--green-mid)}
+.btn-light{background:var(--green-pale);color:var(--green-dark)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-outline{background:#fff;border:1.5px solid var(--gray-line);color:var(--text-main)}
+.btn-sm{padding:.35rem .7rem;font-size:.8rem;border-radius:8px}
+.hamburger{display:none}
+.conn-dot{font-size:.7rem;color:var(--text-sub)}
+
+/* ============ 🏞️ HERO ============ */
+.hero{position:relative;max-width:1180px;margin:1rem auto 0;padding:0 1.25rem}
+.hero-card{
+  position:relative;border-radius:20px;overflow:hidden;min-height:420px;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+  padding:3rem 3.5rem;
+  background:
+    linear-gradient(100deg, rgba(20,40,30,.72) 0%, rgba(20,40,30,.28) 55%, rgba(20,40,30,.15) 100%),
+    linear-gradient(180deg,#f5a15c 0%, #d8756a 30%, #4d6b5b 70%, #1b4332 100%);
+  background-size:cover;background-position:center;color:#fff;
+}
+.hero-title{font-size:3.2rem;font-weight:800;letter-spacing:.5px;text-shadow:0 3px 14px rgba(0,0,0,.35)}
+.hero-sub{font-size:1.15rem;font-weight:300;margin:.4rem 0 1.8rem;text-shadow:0 2px 8px rgba(0,0,0,.35)}
+.search-bar{display:flex;width:min(560px,100%);background:#fff;border-radius:999px;overflow:hidden;box-shadow:var(--shadow-lg)}
+.search-bar input{flex:1;border:none;outline:none;padding:1rem 1.4rem;font-size:1rem;color:var(--text-main)}
+.search-bar button{background:var(--green-light);color:#fff;font-weight:600;font-size:1rem;padding:0 1.8rem;transition:background .2s}
+.search-bar button:hover{background:var(--green-mid)}
+
+/* ============ 🟢 หมวดหมู่ ============ */
+.categories{max-width:1180px;margin:0 auto;padding:1.75rem 1.25rem .5rem;display:flex;justify-content:center;gap:2.2rem;flex-wrap:wrap}
+.cat{display:flex;flex-direction:column;align-items:center;gap:.55rem;background:none;transition:transform .15s}
+.cat:hover{transform:translateY(-3px)}
+.cat-circle{width:74px;height:74px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.7rem;box-shadow:var(--shadow);border:2px solid transparent;transition:border-color .2s, background .2s}
+.cat.active .cat-circle{border-color:var(--green-light);background:var(--green-pale)}
+.cat span{font-size:.85rem;font-weight:500;color:var(--text-main)}
+
+/* ============ 🏆 การ์ดสถานที่ ============ */
+.section{max-width:1180px;margin:0 auto;padding:1.5rem 1.25rem;width:100%}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;flex-wrap:wrap;gap:.6rem}
+.section-title{font-size:1.45rem;font-weight:700;color:var(--text-main)}
+.link-more{color:var(--green-light);font-weight:600;font-size:.9rem;background:none}
+.link-more:hover{text-decoration:underline}
+.grid-places{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem}
+.place-card{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .18s, box-shadow .18s;display:flex;flex-direction:column}
+.place-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.place-img{width:100%;height:165px;object-fit:cover;background:var(--green-pale)}
+.place-body{padding:.85rem 1rem 1rem;display:flex;flex-direction:column;gap:.2rem;flex:1}
+.place-name{font-weight:600;font-size:1rem}
+.place-district{font-size:.83rem;color:var(--text-sub)}
+.place-rating{margin-top:auto;padding-top:.4rem;display:flex;justify-content:flex-end;align-items:center;gap:.3rem;font-size:.9rem;font-weight:600}
+.place-rating .star{color:var(--star)}
+.empty-note{grid-column:1/-1;text-align:center;color:var(--text-sub);background:#fff;border:1.5px dashed var(--gray-line);border-radius:var(--radius);padding:2.5rem 1rem}
+
+/* ============ ✅ จุดเด่น + FOOTER ============ */
+.features{background:var(--green-bg);margin-top:1.5rem}
+.features-inner{max-width:1180px;margin:0 auto;padding:1.6rem 1.25rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.feature{display:flex;align-items:center;gap:.8rem}
+.feature-ic{width:46px;height:46px;border-radius:12px;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.25rem;box-shadow:var(--shadow)}
+.feature p{font-size:.86rem;font-weight:500;line-height:1.35}
+footer{margin-top:auto;background:var(--green-dark);color:#dcefe3;text-align:center;padding:1.1rem;font-size:.88rem;font-weight:300}
+
+/* ============ 📄 หน้ารายละเอียด ============ */
+.breadcrumb{max-width:1180px;margin:0 auto;padding:1.1rem 1.25rem .25rem;font-size:.9rem;color:var(--text-sub);display:flex;gap:.45rem;flex-wrap:wrap}
+.breadcrumb a{color:var(--text-sub)}
+.breadcrumb a:hover{color:var(--green-light)}
+.breadcrumb .current{color:var(--green-dark);font-weight:600}
+.detail-wrap{max-width:1180px;margin:0 auto;padding:1rem 1.25rem;display:grid;grid-template-columns:1.15fr 1fr;gap:2rem;align-items:start}
+.detail-media .main-img{width:100%;height:360px;object-fit:cover;border-radius:16px;box-shadow:var(--shadow);background:var(--green-pale)}
+.detail-info h1{font-size:2rem;font-weight:700}
+.detail-loc{color:var(--green-mid);font-weight:600;margin:.3rem 0 1rem;font-size:.95rem}
+.detail-desc{font-size:.95rem;line-height:1.9;color:#3d4a44;font-weight:300;white-space:pre-line}
+.info-box{margin-top:1.4rem;background:var(--gray-bg);border:1px solid var(--gray-line);border-radius:var(--radius);padding:1.1rem 1.3rem;display:grid;gap:.85rem}
+.info-row{display:flex;align-items:center;gap:.8rem;font-size:.93rem}
+.info-row .ic{width:34px;height:34px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.info-row .lbl{color:var(--text-sub);min-width:110px}
+.info-row .val{font-weight:600}
+.detail-rating{display:inline-flex;align-items:center;gap:.35rem;margin-left:.6rem;background:var(--green-pale);border-radius:999px;padding:.15rem .7rem;font-size:.85rem;font-weight:600}
+.detail-rating .star{color:var(--star)}
+.checkin-btn{margin-top:1.1rem;width:100%;padding:.85rem;font-size:1rem}
+.checkin-count{font-size:.83rem;color:var(--text-sub);text-align:center;margin-top:.5rem}
+
+/* สถานที่ใกล้เคียง */
+.nearby-scroll{display:grid;grid-auto-flow:column;grid-auto-columns:190px;gap:1rem;overflow-x:auto;padding-bottom:.75rem;scroll-snap-type:x mandatory}
+.nearby-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;scroll-snap-align:start;transition:transform .15s;position:relative}
+.nearby-card:hover{transform:translateY(-3px)}
+.nearby-card img{width:100%;height:105px;object-fit:cover;background:var(--green-pale)}
+.nearby-card .nb-body{padding:.6rem .75rem .75rem}
+.nearby-card .nb-name{font-size:.86rem;font-weight:600;line-height:1.3}
+.nearby-card .nb-sub{font-size:.76rem;color:var(--text-sub);margin-top:.15rem}
+.nearby-card .nb-km{font-size:.8rem;font-weight:700;color:var(--green-mid);margin-top:.3rem}
+.km-badge{position:absolute;top:.5rem;right:.5rem;background:rgba(27,67,50,.85);color:#fff;font-size:.72rem;font-weight:600;border-radius:999px;padding:.15rem .55rem}
+
+/* บริการใกล้เคียง */
+.svc-filter{display:flex;gap:.5rem;flex-wrap:wrap}
+.chip{background:#fff;border:1.5px solid var(--gray-line);border-radius:999px;padding:.35rem .95rem;font-size:.84rem;font-weight:500;transition:all .15s}
+.chip:hover{border-color:var(--green-light)}
+.chip.active{background:var(--green-dark);border-color:var(--green-dark);color:#fff}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem}
+.svc-card{background:#fff;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform .15s}
+.svc-card:hover{transform:translateY(-3px)}
+.svc-card img{width:100%;height:120px;object-fit:cover;background:var(--green-pale)}
+.svc-body{padding:.7rem .85rem .85rem;display:flex;flex-direction:column;gap:.15rem;flex:1}
+.svc-type{font-size:.72rem;font-weight:600;color:var(--green-mid);display:flex;align-items:center;gap:.3rem}
+.svc-name{font-size:.92rem;font-weight:600;line-height:1.3}
+.svc-sub{font-size:.78rem;color:var(--text-sub)}
+.svc-foot{margin-top:auto;padding-top:.45rem;display:flex;justify-content:space-between;align-items:center}
+.svc-km{font-size:.82rem;font-weight:700;color:var(--green-mid)}
+.svc-tel{font-size:.76rem;color:var(--text-sub)}
+
+/* 🗺️ แผนที่ Leaflet */
+#mapCanvas{width:100%;height:420px;border-radius:16px;box-shadow:var(--shadow);background:var(--green-pale);z-index:1}
+.map-links{display:flex;gap:.6rem;margin-top:.75rem;flex-wrap:wrap}
+.map-legend{display:flex;gap:1.1rem;flex-wrap:wrap;font-size:.82rem;color:var(--text-sub);margin-top:.6rem}
+.map-legend span{display:flex;align-items:center;gap:.35rem}
+.pin-marker{display:flex;align-items:center;justify-content:center;font-size:1.5rem;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.pin-marker.pin-main{font-size:2.1rem}
+.leaflet-popup-content-wrapper{font-family:'Prompt',sans-serif;border-radius:12px}
+.leaflet-popup-content{margin:.7rem .9rem;font-size:.85rem;line-height:1.5}
+.popup-name{font-weight:700;color:var(--green-dark);font-size:.92rem}
+.popup-sub{color:var(--text-sub);font-size:.78rem}
+.popup-km{color:var(--green-mid);font-weight:600;font-size:.8rem;margin-top:.15rem}
+.popup-btn{display:inline-block;margin-top:.45rem;background:var(--green-dark);color:#fff!important;border-radius:999px;padding:.28rem .8rem;font-size:.78rem;font-weight:600;cursor:pointer}
+.popup-btn:hover{background:var(--green-mid)}
+
+/* ============ 🔐 AUTH / โปรไฟล์ ============ */
+.auth-wrap{max-width:420px;margin:3rem auto;padding:0 1.25rem;width:100%}
+.auth-card{background:#fff;border-radius:18px;box-shadow:var(--shadow-lg);padding:2.2rem 2rem}
+.auth-card h2{color:var(--green-dark);font-size:1.4rem;margin-bottom:.35rem;text-align:center}
+.auth-card .auth-sub{text-align:center;font-size:.85rem;color:var(--text-sub);margin-bottom:1.5rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.35rem}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:.7rem .95rem;border:1.5px solid var(--gray-line);border-radius:10px;outline:none;transition:border-color .2s;background:#fff}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green-light)}
+.form-group textarea{resize:vertical;min-height:110px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.auth-switch{text-align:center;font-size:.85rem;margin-top:1.1rem;color:var(--text-sub)}
+.auth-switch button{background:none;color:var(--green-light);font-weight:600}
+.auth-switch button:hover{text-decoration:underline}
+.form-msg{font-size:.85rem;margin-top:.75rem;text-align:center;display:none;border-radius:8px;padding:.55rem}
+.form-msg.error{display:block;background:#fdecec;color:var(--danger)}
+.form-msg.success{display:block;background:var(--green-pale);color:var(--green-dark)}
+.w-full{width:100%}
+.hint{font-size:.74rem;color:var(--text-sub);margin-top:.3rem}
+
+/* โปรไฟล์ */
+.profile-wrap{max-width:760px;margin:2rem auto;padding:0 1.25rem;width:100%}
+.profile-head{background:linear-gradient(120deg,var(--green-dark),var(--green-mid));color:#fff;border-radius:18px;padding:1.6rem 1.8rem;display:flex;align-items:center;gap:1.1rem;box-shadow:var(--shadow)}
+.avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0}
+.profile-head .p-name{font-size:1.25rem;font-weight:700}
+.profile-head .p-role{font-size:.82rem;opacity:.85}
+
+/* ============ 🛠️ ADMIN ============ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;margin-bottom:1.25rem}
+.stat-card{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:1.1rem 1.25rem;display:flex;align-items:center;gap:.9rem}
+.stat-ic{width:46px;height:46px;border-radius:12px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.stat-num{font-size:1.5rem;font-weight:800;color:var(--green-dark);line-height:1.1}
+.stat-lbl{font-size:.78rem;color:var(--text-sub)}
+.admin-wrap{max-width:1180px;margin:0 auto;padding:0 1.25rem 1.5rem;width:100%;display:grid;grid-template-columns:400px 1fr;gap:1.75rem;align-items:start}
+.panel{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:1.5rem}
+.panel h3{color:var(--green-dark);font-size:1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.img-preview{width:100%;height:150px;object-fit:cover;border-radius:10px;margin-top:.5rem;border:1.5px dashed var(--gray-line);display:none}
+.admin-table{width:100%;border-collapse:collapse;font-size:.88rem}
+.admin-table th{text-align:left;padding:.6rem .7rem;background:var(--green-bg);color:var(--green-dark);font-weight:600}
+.admin-table th:first-child{border-radius:8px 0 0 8px}
+.admin-table th:last-child{border-radius:0 8px 8px 0}
+.admin-table td{padding:.65rem .7rem;border-bottom:1px solid var(--gray-line);vertical-align:middle}
+.admin-table img{width:52px;height:40px;object-fit:cover;border-radius:6px;background:var(--green-pale)}
+.tbl-actions{display:flex;gap:.4rem}
+.badge{display:inline-block;background:var(--green-pale);color:var(--green-dark);border-radius:999px;padding:.1rem .6rem;font-size:.75rem;font-weight:600}
+.badge.amber{background:#fdf0dc;color:#a9741d}
+.admin-tabs{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+
+/* ============ ⚙️ ทั่วไป / Responsive ============ */
+.view{display:none;animation:fadeIn .3s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green-dark);color:#fff;padding:.75rem 1.5rem;border-radius:999px;font-size:.9rem;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hidden{display:none!important}
+
+@media (max-width:900px){
+  .detail-wrap{grid-template-columns:1fr}
+  .admin-wrap{grid-template-columns:1fr}
+  .hero-card{padding:2.2rem 1.6rem;min-height:340px}
+  .hero-title{font-size:2.3rem}
+}
+@media (max-width:640px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;flex-direction:column;gap:0;box-shadow:0 8px 20px rgba(27,67,50,.12);padding:.5rem 0}
+  .nav-links.open{display:flex}
+  .nav-links a{padding:.8rem 1.5rem;width:100%}
+  .hamburger{display:flex}
+  .categories{gap:1.1rem}
+  .cat-circle{width:62px;height:62px;font-size:1.4rem}
+  .hero-title{font-size:1.9rem}
+  .form-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ 🧭 NAVBAR ═══════════════ -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="brand" onclick="go('home')">
+      <div class="brand-logo">⛰️</div>
+      <div class="brand-text">
+        <div class="brand-name">เที่ยวพัทลุง</div>
+        <div class="brand-sub">เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม</div>
+      </div>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a href="#" data-nav="home" class="active" onclick="go('home');return false;">หน้าแรก</a>
+      <a href="#" data-nav="places" onclick="goPlaces();return false;">สถานที่ท่องเที่ยว</a>
+      <a href="#" onclick="go('home');scrollToSection('features');return false;">เกี่ยวกับเรา</a>
+      <a href="#" onclick="go('home');scrollToSection('footer');return false;">ติดต่อเรา</a>
+    </div>
+    <div class="nav-actions">
+      <button class="icon-btn" title="ค้นหา" onclick="focusSearch()">🔍</button>
+      <button class="btn btn-light hidden" id="btnAdmin" onclick="go('admin')">🛠️ จัดการ</button>
+      <button class="btn btn-outline hidden" id="btnProfile" onclick="openProfile()">👤 <span id="navUsername"></span></button>
+      <button class="btn btn-primary" id="btnAuth" onclick="go('auth')">เข้าสู่ระบบ</button>
+      <button class="icon-btn hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════ 🏠 VIEW 1: หน้าแรก ═══════════════ -->
+<main id="home-view" class="view active">
+  <section class="hero">
+    <div class="hero-card">
+      <h1 class="hero-title">เที่ยวพัทลุง</h1>
+      <p class="hero-sub">เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม</p>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 ค้นหาสถานที่ท่องเที่ยว..." onkeydown="if(event.key==='Enter')doSearch()">
+        <button onclick="doSearch()">ค้นหา</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="categories" id="categoryBar">
+    <button class="cat" data-cat="ธรรมชาติ"  onclick="filterCategory('ธรรมชาติ')"><div class="cat-circle">🌿</div><span>ธรรมชาติ</span></button>
+    <button class="cat" data-cat="วัด/ศาสนา" onclick="filterCategory('วัด/ศาสนา')"><div class="cat-circle">🛕</div><span>วัด / ศาสนา</span></button>
+    <button class="cat" data-cat="คาเฟ่"     onclick="filterCategory('คาเฟ่')"><div class="cat-circle">☕</div><span>คาเฟ่</span></button>
+    <button class="cat" data-cat="ถ่ายรูป"   onclick="filterCategory('ถ่ายรูป')"><div class="cat-circle">📷</div><span>ถ่ายรูป</span></button>
+    <button class="cat" data-cat="ครอบครัว"  onclick="filterCategory('ครอบครัว')"><div class="cat-circle">👨‍👩‍👧‍👦</div><span>ครอบครัว</span></button>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title" id="placesTitle">สถานที่แนะนำ</h2>
+      <button class="link-more" onclick="goPlaces()">ดูทั้งหมด ›</button>
+    </div>
+    <div class="grid-places" id="placesGrid"></div>
+  </section>
+
+  <section class="features" id="featuresStrip">
+    <div class="features-inner">
+      <div class="feature"><div class="feature-ic">📍</div><p>สถานที่ท่องเที่ยว<br>หลากหลายสไตล์</p></div>
+      <div class="feature"><div class="feature-ic">📸</div><p>บรรยากาศดี<br>ถ่ายรูปสวย</p></div>
+      <div class="feature"><div class="feature-ic">🍴</div><p>อาหารอร่อย<br>ต้องลอง</p></div>
+      <div class="feature"><div class="feature-ic">🚗</div><p>เดินทางสะดวก<br>ปลอดภัย</p></div>
+    </div>
+  </section>
+</main>
+
+<!-- ═══════════════ 📄 VIEW 2: หน้ารายละเอียด ═══════════════ -->
+<main id="detail-view" class="view">
+  <div class="breadcrumb">
+    <a href="#" onclick="go('home');return false;">หน้าแรก</a> ›
+    <a href="#" onclick="goPlaces();return false;">สถานที่ท่องเที่ยว</a> ›
+    <span class="current" id="bcName">-</span>
+  </div>
+
+  <div class="detail-wrap">
+    <div class="detail-media">
+      <img class="main-img" id="dImg" src="" alt="ภาพสถานที่">
+    </div>
+    <div class="detail-info">
+      <h1 id="dName">-</h1>
+      <div class="detail-loc">📍 <span id="dDistrict">-</span> จ.พัทลุง
+        <span class="detail-rating"><span class="star">★</span><span id="dRating">-</span></span>
+      </div>
+      <p class="detail-desc" id="dDesc">-</p>
+      <div class="info-box">
+        <div class="info-row"><div class="ic">🕒</div><span class="lbl">เวลาเปิด-ปิด</span><span class="val" id="dHours">-</span></div>
+        <div class="info-row"><div class="ic">🎟️</div><span class="lbl">ค่าเข้าชม</span><span class="val" id="dFee">-</span></div>
+        <div class="info-row"><div class="ic">📞</div><span class="lbl">โทรศัพท์</span><span class="val" id="dPhone">-</span></div>
+      </div>
+      <!-- ✅ ปุ่มเช็คอิน: บันทึกประวัติว่ามาเที่ยวที่นี่แล้ว -->
+      <button class="btn btn-primary checkin-btn" onclick="doCheckin()">✅ เช็คอินที่นี่</button>
+      <div class="checkin-count" id="checkinCount"></div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-head"><h2 class="section-title">🏕️ สถานที่ใกล้เคียง</h2></div>
+    <div class="nearby-scroll" id="nearbyRow"></div>
+  </section>
+
+  <section class="section" style="padding-top:.25rem">
+    <div class="section-head">
+      <h2 class="section-title">🏨 บริการใกล้เคียง</h2>
+      <div class="svc-filter" id="svcFilter">
+        <button class="chip active" data-type="all" onclick="filterService('all')">ทั้งหมด</button>
+        <button class="chip" data-type="ร้านอาหาร" onclick="filterService('ร้านอาหาร')">🍜 ร้านอาหาร</button>
+        <button class="chip" data-type="คาเฟ่" onclick="filterService('คาเฟ่')">☕ คาเฟ่</button>
+        <button class="chip" data-type="โรงแรม" onclick="filterService('โรงแรม')">🏨 โรงแรม</button>
+        <button class="chip" data-type="รีสอร์ท" onclick="filterService('รีสอร์ท')">🏝️ รีสอร์ท</button>
+      </div>
+    </div>
+    <div class="svc-grid" id="svcGrid"></div>
+  </section>
+
+  <section class="section" style="padding-top:.25rem">
+    <div class="section-head"><h2 class="section-title">📍 แผนที่</h2></div>
+    <div id="mapCanvas"></div>
+    <div class="map-legend">
+      <span>📍 สถานที่ปัจจุบัน</span><span>🏕️ ที่เที่ยวใกล้เคียง</span>
+      <span>🍜 ร้านอาหาร</span><span>☕ คาเฟ่</span><span>🏨 โรงแรม</span><span>🏝️ รีสอร์ท</span>
+    </div>
+    <div class="map-links">
+      <a class="btn btn-light" id="mapOpenLink" href="#" target="_blank" rel="noopener">🧭 นำทางด้วย Google Maps</a>
+    </div>
+  </section>
+</main>
+
+<!-- ═══════════════ 🔐 VIEW 3: เข้าสู่ระบบ / สมัครสมาชิก (แบบง่าย) ═══════════════ -->
+<main id="auth-view" class="view">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <!-- ฟอร์มเข้าสู่ระบบ -->
+      <div id="loginForm">
+        <h2>เข้าสู่ระบบ 🌿</h2>
+        <p class="auth-sub">ยินดีต้อนรับกลับสู่เที่ยวพัทลุง</p>
+        <div class="form-group">
+          <label for="liUser">ชื่อผู้ใช้</label>
+          <input type="text" id="liUser" placeholder="ชื่อผู้ใช้ของคุณ">
+        </div>
+        <div class="form-group">
+          <label for="liPass">รหัสผ่าน</label>
+          <input type="password" id="liPass" placeholder="รหัสผ่าน" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="btn btn-primary w-full" onclick="doLogin()">เข้าสู่ระบบ</button>
+        <div class="form-msg" id="liMsg"></div>
+        <div class="auth-switch">ยังไม่มีบัญชี? <button onclick="switchAuth('register')">สมัครสมาชิก</button></div>
+      </div>
+
+      <!-- ฟอร์มสมัครสมาชิก -->
+      <div id="registerForm" style="display:none">
+        <h2>สมัครสมาชิก ✨</h2>
+        <p class="auth-sub">สมัครง่าย ๆ แค่ตั้งชื่อผู้ใช้และรหัสผ่าน</p>
+        <div class="form-group">
+          <label for="rgUser">ชื่อผู้ใช้</label>
+          <input type="text" id="rgUser" placeholder="เช่น somchai">
+        </div>
+        <div class="form-group">
+          <label for="rgPass">รหัสผ่าน</label>
+          <input type="password" id="rgPass" placeholder="อย่างน้อย 4 ตัวอักษร">
+        </div>
+        <div class="form-group">
+          <label for="rgPass2">ยืนยันรหัสผ่าน</label>
+          <input type="password" id="rgPass2" placeholder="พิมพ์รหัสผ่านอีกครั้ง" onkeydown="if(event.key==='Enter')doRegister()">
+        </div>
+        <button class="btn btn-primary w-full" onclick="doRegister()">สมัครสมาชิก</button>
+        <div class="form-msg" id="rgMsg"></div>
+        <div class="auth-switch">มีบัญชีแล้ว? <button onclick="switchAuth('login')">เข้าสู่ระบบ</button></div>
+        <p class="hint" style="text-align:center;margin-top:.6rem">💡 ผู้สมัครคนแรกของระบบจะได้สิทธิ์แอดมินอัตโนมัติ</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════ 👤 VIEW 4: โปรไฟล์ + ประวัติเช็คอิน ═══════════════ -->
+<main id="profile-view" class="view">
+  <div class="profile-wrap">
+    <div class="profile-head">
+      <div class="avatar">👤</div>
+      <div>
+        <div class="p-name" id="pfName">-</div>
+        <div class="p-role" id="pfRole">-</div>
+      </div>
+      <button class="btn btn-light" style="margin-left:auto" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
+
+    <div class="panel" style="margin-top:1.25rem">
+      <h3>🧾 ประวัติเช็คอินของฉัน (<span id="pfCheckinCount">0</span> ครั้ง)</h3>
+      <div style="overflow-x:auto">
+        <table class="admin-table">
+          <thead><tr><th>#</th><th>สถานที่</th><th>อำเภอ</th><th>วันที่</th><th>เวลา</th></tr></thead>
+          <tbody id="pfCheckinBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════ 🛠️ VIEW 5: หน้าจัดการแอดมิน ═══════════════ -->
+<main id="admin-view" class="view">
+  <div class="section" style="padding-bottom:0">
+    <div class="section-head">
+      <h2 class="section-title">🛠️ ระบบจัดการ <span class="badge" id="adminName"></span></h2>
+      <button class="btn btn-outline" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
+
+    <!-- 📊 สถิติแบบง่าย: สมาชิกกี่คน เช็คอินกี่ครั้ง -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-ic">👥</div><div><div class="stat-num" id="statUsers">0</div><div class="stat-lbl">สมาชิกทั้งหมด (คน)</div></div></div>
+      <div class="stat-card"><div class="stat-ic">✅</div><div><div class="stat-num" id="statCheckins">0</div><div class="stat-lbl">เช็คอินทั้งหมด (ครั้ง)</div></div></div>
+      <div class="stat-card"><div class="stat-ic">🏞️</div><div><div class="stat-num" id="statPlaces">0</div><div class="stat-lbl">สถานที่ท่องเที่ยว</div></div></div>
+      <div class="stat-card"><div class="stat-ic">🏨</div><div><div class="stat-num" id="statServices">0</div><div class="stat-lbl">บริการใกล้เคียง</div></div></div>
+    </div>
+  </div>
+
+  <div class="admin-wrap">
+    <!-- ฟอร์ม เพิ่ม/แก้ไข -->
+    <div class="panel">
+      <h3 id="formTitle">➕ เพิ่มข้อมูลใหม่</h3>
+      <input type="hidden" id="fId">
+      <div class="form-group">
+        <label for="fKind">ชนิดข้อมูล *</label>
+        <select id="fKind" onchange="onKindChange()">
+          <option value="place">🏞️ สถานที่ท่องเที่ยว</option>
+          <option value="service">🏨 บริการใกล้เคียง</option>
+        </select>
+      </div>
+      <div class="form-group"><label for="fName">ชื่อ *</label><input type="text" id="fName" placeholder="เช่น ทะเลน้อย"></div>
+      <div class="form-group"><label for="fDistrict">อำเภอ *</label><input type="text" id="fDistrict" placeholder="เช่น อ.ควนขนุน"></div>
+      <div class="form-group"><label for="fCategory">หมวดหมู่ *</label><select id="fCategory"></select></div>
+      <div class="form-group"><label for="fDesc">คำอธิบาย</label><textarea id="fDesc" placeholder="บรรยายจุดเด่น..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label for="fLat">ละติจูด *</label><input type="number" id="fLat" step="any" placeholder="7.6261"></div>
+        <div class="form-group"><label for="fLng">ลองจิจูด *</label><input type="number" id="fLng" step="any" placeholder="100.0890"></div>
+      </div>
+      <p class="hint">💡 คลิกขวาบน Google Maps → คัดลอกตัวเลขพิกัด</p>
+      <div class="form-group" style="margin-top:.75rem"><label for="fRating">คะแนน (0-5)</label><input type="number" id="fRating" min="0" max="5" step="0.1" value="4.5"></div>
+      <div class="form-group"><label for="fHours">เวลาเปิด-ปิด</label><input type="text" id="fHours" placeholder="เช่น 06.00 - 18.00 น."></div>
+      <div class="form-group"><label for="fFee">ค่าเข้าชม / ราคา</label><input type="text" id="fFee" placeholder="เช่น 20 บาท / ฟรี"></div>
+      <div class="form-group"><label for="fPhone">เบอร์โทรศัพท์</label><input type="text" id="fPhone" placeholder="074-xxxxxxx"></div>
+      <div class="form-group">
+        <label for="fImage">ลิงก์รูปภาพ (URL)</label>
+        <input type="text" id="fImage" placeholder="https://... (วางลิงก์รูปจากเว็บ)" oninput="previewImage()">
+        <img class="img-preview" id="fPreview" alt="ตัวอย่างรูป">
+      </div>
+      <button class="btn btn-primary w-full" onclick="saveItem()">💾 บันทึกข้อมูล</button>
+      <button class="btn btn-outline w-full hidden" id="fCancel" style="margin-top:.6rem" onclick="resetForm()">ยกเลิกการแก้ไข</button>
+      <div class="form-msg" id="formMsg"></div>
+    </div>
+
+    <!-- ตาราง 4 แท็บ: สถานที่ / บริการ / สมาชิก / เช็คอิน -->
+    <div class="panel">
+      <div class="admin-tabs">
+        <button class="btn btn-primary" id="tab-places"   onclick="setAdminTab('places')">🏞️ สถานที่</button>
+        <button class="btn btn-outline" id="tab-services" onclick="setAdminTab('services')">🏨 บริการ</button>
+        <button class="btn btn-outline" id="tab-users"    onclick="setAdminTab('users')">👥 สมาชิก</button>
+        <button class="btn btn-outline" id="tab-checkins" onclick="setAdminTab('checkins')">✅ เช็คอิน</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="admin-table">
+          <thead id="adminTableHead"></thead>
+          <tbody id="adminTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer id="footer">© 2024 เที่ยวพัทลุง | เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม <span class="conn-dot" id="connStatus"></span></footer>
+<div class="toast" id="toast"></div>
+
+<!-- ═══ Firebase Realtime Database (compat — สไตล์เดียวกับไฟล์ตัวอย่าง) ═══ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+/* ============================================================
+   ⚙️ FIREBASE CONFIG — โค้ดเดิมของคุณ ไม่เปลี่ยน ✅
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBI3sTGldVXBE6dj6at47LL0-dSqEgL9TI",
+  authDomain: "acbce-72e69.firebaseapp.com",
+  databaseURL: "https://acbce-72e69-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "acbce-72e69",
+  storageBucket: "acbce-72e69.firebasestorage.app",
+  messagingSenderId: "863082132334",
+  appId: "1:863082132334:web:f35ecf57389b873a39877f",
+  measurementId: "G-N8DJR9167Q"
+};
+
+/* ใช้ Firebase เมื่อโหลด SDK สำเร็จและใส่คีย์แล้ว, ถ้าไม่ → โหมดออฟไลน์ localStorage */
+const USE_FIREBASE = (typeof firebase !== 'undefined')
+                  && !String(firebaseConfig.apiKey).includes('YOUR_');
+
+/* ============================================================
+   📦 ข้อมูลตัวอย่าง — 18 สถานที่ + 14 บริการ (seed อัตโนมัติเมื่อ DB ว่าง)
+   ============================================================ */
+const img = (seed) => `https://picsum.photos/seed/${seed}/600/400`;
+
+const DEFAULT_PLACES = [
+  { id:"p1",  name:"ทะเลน้อย", district:"อ.ควนขนุน", category:"ธรรมชาติ", rating:4.8, lat:7.7862, lng:100.1460, mainImage:img("talaynoi"), openHours:"06.00 - 18.00 น.", fee:"20 บาท", phone:"074-685230",
+    description:"ทะเลน้อย เป็นแหล่งน้ำจืดขนาดใหญ่ มีความหลากหลายทางธรรมชาติ เป็นแหล่งที่อยู่อาศัยของสัตว์น้ำและนกนานาชนิด ไฮไลต์คือทุ่งบัวแดงบานยามเช้าและควายน้ำ ล่องเรือชมได้ตลอดปี" },
+  { id:"p2",  name:"สะพานเฉลิมพระเกียรติ 80 พรรษา", district:"อ.ควนขนุน", category:"ถ่ายรูป", rating:4.7, lat:7.8065, lng:100.1290, mainImage:img("bridge80"), openHours:"เปิดตลอดวัน", fee:"ฟรี", phone:"074-685230",
+    description:"สะพานยาวที่สุดในประเทศไทยทอดข้ามทะเลน้อย จุดชมพระอาทิตย์ขึ้นและควายน้ำเล็มหญ้ากลางบึงบัว ถ่ายรูปสวยทุกช่วงเวลา" },
+  { id:"p3",  name:"เขาอกทะลุ", district:"อ.เมืองพัทลุง", category:"ธรรมชาติ", rating:4.6, lat:7.6261, lng:100.0890, mainImage:img("khaook"), openHours:"06.00 - 18.00 น.", fee:"ฟรี", phone:"074-611201",
+    description:"ภูเขาสัญลักษณ์ประจำจังหวัดพัทลุง สูงประมาณ 250 เมตร มีช่องทะลุกลางเขาเป็นเอกลักษณ์ เดินขึ้นบันไดชมวิวเมืองพัทลุงแบบ 360 องศา" },
+  { id:"p4",  name:"วัดเขียนบางแก้ว", district:"อ.เขาชัยสน", category:"วัด/ศาสนา", rating:4.6, lat:7.4640, lng:100.1530, mainImage:img("watkhian"), openHours:"08.00 - 17.00 น.", fee:"ฟรี", phone:"074-691225",
+    description:"วัดเก่าแก่ที่สุดแห่งหนึ่งของภาคใต้ ประดิษฐานพระธาตุบางแก้ว โบราณสถานสมัยศรีวิชัย เหมาะแก่การสักการะและศึกษาประวัติศาสตร์เมืองพัทลุง" },
+  { id:"p5",  name:"หาดแสนสุขลำปำ", district:"อ.เมืองพัทลุง", category:"ครอบครัว", rating:4.4, lat:7.6330, lng:100.1560, mainImage:img("lampam"), openHours:"เปิดตลอดวัน", fee:"ฟรี", phone:"074-611201",
+    description:"ชายหาดริมทะเลสาบสงขลา บรรยากาศร่มรื่นด้วยทิวสน มีศาลาพักผ่อน ร้านอาหารทะเลรสเด็ด เหมาะกับปิกนิกครอบครัวยามเย็น" },
+  { id:"p6",  name:"วังเจ้าเมืองพัทลุง (วังเก่า-วังใหม่)", district:"อ.เมืองพัทลุง", category:"ถ่ายรูป", rating:4.5, lat:7.6175, lng:100.1040, mainImage:img("wangchao"), openHours:"09.00 - 16.00 น. (หยุดจันทร์-อังคาร)", fee:"ฟรี", phone:"074-613007",
+    description:"เรือนไทยโบราณอายุกว่า 100 ปี ที่พำนักของเจ้าเมืองพัทลุงในอดีต สถาปัตยกรรมงดงาม มุมถ่ายรูปย้อนยุคสุดคลาสสิก" },
+  { id:"p7",  name:"น้ำตกไพรวัลย์", district:"อ.กงหรา", category:"ธรรมชาติ", rating:4.5, lat:7.3750, lng:99.9330, mainImage:img("praiwan"), openHours:"08.00 - 17.00 น.", fee:"20 บาท", phone:"074-681088",
+    description:"น้ำตกขนาดใหญ่ที่สุดของพัทลุง โอบล้อมด้วยป่าเขียวขจีเทือกเขาบรรทัด น้ำใสเย็นตลอดปี เล่นน้ำได้หลายชั้น" },
+  { id:"p8",  name:"บ่อน้ำร้อนเขาชัยสน", district:"อ.เขาชัยสน", category:"ครอบครัว", rating:4.3, lat:7.4430, lng:100.1180, mainImage:img("hotspring"), openHours:"08.00 - 18.00 น.", fee:"20 บาท", phone:"074-691225",
+    description:"บ่อน้ำร้อนธรรมชาติอุณหภูมิราว 45 องศา แช่เท้าผ่อนคลาย มีถ้ำลอกอ-ถ้ำน้ำเย็นให้เที่ยวต่อในบริเวณเดียวกัน" },
+  { id:"p9",  name:"ล่องแก่งหนานมดแดง", district:"อ.ป่าพะยอม", category:"ครอบครัว", rating:4.6, lat:7.8410, lng:99.9420, mainImage:img("nanmoddang"), openHours:"08.30 - 17.00 น.", fee:"เริ่มต้น 60 บาท", phone:"086-9573028",
+    description:"ล่องแก่งลำน้ำใสไหลเย็นจากเทือกเขาบรรทัด สนุกปลอดภัยได้ทั้งครอบครัว มีร้านอาหารและจุดแช่น้ำเล่นตลอดสาย" },
+  { id:"p10", name:"ตลาดใต้โหนด", district:"อ.ควนขนุน", category:"ครอบครัว", rating:4.7, lat:7.7530, lng:100.0210, mainImage:img("tainode"), openHours:"เสาร์-อาทิตย์ 08.00 - 15.00 น.", fee:"ฟรี", phone:"089-4671960",
+    description:"ตลาดนัดวิถีชุมชนใต้ร่มตาลโตนด ของกินพื้นบ้าน งานคราฟต์ ดนตรีสด บรรยากาศอบอุ่นแบบปักษ์ใต้แท้ ๆ" },
+  { id:"p11", name:"วัดคูหาสวรรค์", district:"อ.เมืองพัทลุง", category:"วัด/ศาสนา", rating:4.5, lat:7.6170, lng:100.0760, mainImage:img("watkhuha"), openHours:"08.00 - 17.00 น.", fee:"ฟรี", phone:"074-611201",
+    description:"พระอารามหลวงคู่เมืองพัทลุง มีถ้ำคูหาสวรรค์ประดิษฐานพระพุทธรูปโบราณ ภายในเย็นสบาย ด้านบนชมวิวเมืองได้" },
+  { id:"p12", name:"อุทยานแห่งชาติเขาปู่-เขาย่า", district:"อ.ศรีบรรพต", category:"ธรรมชาติ", rating:4.4, lat:7.6980, lng:99.8720, mainImage:img("khaopu"), openHours:"08.00 - 16.30 น.", fee:"40 บาท", phone:"074-689194",
+    description:"ผืนป่าดิบชื้นเทือกเขาบรรทัด มีน้ำตกควนประ เส้นทางศึกษาธรรมชาติ และจุดกางเต็นท์ท่ามกลางขุนเขา" },
+  { id:"p13", name:"แหลมจองถนน", district:"อ.เขาชัยสน", category:"ถ่ายรูป", rating:4.3, lat:7.4530, lng:100.2050, mainImage:img("chongthanon"), openHours:"เปิดตลอดวัน", fee:"ฟรี", phone:"074-691225",
+    description:"แหลมยื่นสู่ทะเลสาบสงขลา ชมวิถีประมงยอยักษ์ พระอาทิตย์ขึ้นสวยงาม มีสะพานไม้ทอดยาวให้เดินถ่ายรูป" },
+  { id:"p14", name:"จุดชมวิวปากประ", district:"อ.ควนขนุน", category:"ถ่ายรูป", rating:4.8, lat:7.7920, lng:100.1350, mainImage:img("pakpra"), openHours:"เปิดตลอดวัน (แนะนำ 05.30-08.00 น.)", fee:"ฟรี (ล่องเรือเริ่ม 500 บาท)", phone:"081-5401615",
+    description:"จุดชมยอยักษ์ยามพระอาทิตย์ขึ้นที่โด่งดังระดับโลก สายหมอกลอยเหนือทะเลสาบ ช่างภาพต้องมาเยือนสักครั้ง" },
+  { id:"p15", name:"เกาะสี่ เกาะห้า", district:"อ.ปากพะยูน", category:"ธรรมชาติ", rating:4.4, lat:7.3380, lng:100.3400, mainImage:img("kohsee"), openHours:"08.00 - 17.00 น.", fee:"เหมาเรือเริ่ม 1,500 บาท", phone:"074-699023",
+    description:"หมู่เกาะกลางทะเลสาบสงขลา แหล่งรังนกนางแอ่นสัมปทาน ชมหน้าผาหินปูนและวิถีชาวประมงทะเลสาบ" },
+  { id:"p16", name:"นาโปแก", district:"อ.เมืองพัทลุง", category:"คาเฟ่", rating:4.5, lat:7.5720, lng:100.0700, mainImage:img("napokae"), openHours:"09.00 - 18.00 น.", fee:"ฟรี (มีค่ากิจกรรม)", phone:"093-5834678",
+    description:"แลนด์มาร์กกลางทุ่งนา คาเฟ่และแหล่งเรียนรู้วิถีเกษตร เดินสะพานไม้ไผ่กลางนาข้าวเขียวขจี ถ่ายรูปสวยทุกฤดูทำนา" },
+  { id:"p17", name:"ถ้ำมาลัยเทพนิมิต", district:"อ.เมืองพัทลุง", category:"วัด/ศาสนา", rating:4.2, lat:7.6420, lng:100.0680, mainImage:img("malai"), openHours:"08.00 - 17.00 น.", fee:"ฟรี", phone:"074-611201",
+    description:"ถ้ำหินปูนขนาดใหญ่ ภายในประดิษฐานพระพุทธรูปและหินงอกหินย้อยงดงาม ด้านบนเป็นจุดชมวิวเมืองพัทลุง" },
+  { id:"p18", name:"ภูเขาย้อยแลนด์ (จุดชมวิวควนนกเต้น)", district:"อ.ศรีนครินทร์", category:"คาเฟ่", rating:4.4, lat:7.5560, lng:99.9660, mainImage:img("phukhaoyoi"), openHours:"07.00 - 18.00 น.", fee:"ฟรี", phone:"089-2971456",
+    description:"จุดชมวิวทะเลหมอกและทุ่งนาแบบพาโนรามา มีคาเฟ่เล็ก ๆ ให้จิบกาแฟรับลมเย็นยามเช้า วิวสวยเกินราคา" },
+];
+
+const DEFAULT_SERVICES = [
+  { id:"s1",  name:"ศรีปากประ รีสอร์ท", type:"รีสอร์ท", district:"อ.ควนขนุน", lat:7.7900, lng:100.1340, mainImage:img("sripakpra"), phone:"081-5401615", fee:"เริ่มต้น 2,500 บาท/คืน", description:"รีสอร์ทริมทะเลสาบ จุดชมยอยักษ์ปากประจากหน้าห้องพัก" },
+  { id:"s2",  name:"บ้านทะเลน้อยโฮมสเตย์", type:"รีสอร์ท", district:"อ.ควนขนุน", lat:7.7830, lng:100.1420, mainImage:img("homestay"), phone:"086-2911447", fee:"เริ่มต้น 800 บาท/คืน", description:"โฮมสเตย์วิถีชุมชนริมทะเลน้อย พร้อมบริการเรือชมบัวแดงยามเช้า" },
+  { id:"s3",  name:"ครัวป้าน้อง ทะเลน้อย", type:"ร้านอาหาร", district:"อ.ควนขนุน", lat:7.7845, lng:100.1445, mainImage:img("kruapanong"), phone:"084-8562217", fee:"อาหารใต้ / ปลาทะเลสาบ", description:"ร้านดังริมทะเลน้อย เด็ดปลาลูกเบร่ทอด แกงส้มปลาหัวโม่ง วิวบึงบัว" },
+  { id:"s4",  name:"ปากประ In Love คาเฟ่", type:"คาเฟ่", district:"อ.ควนขนุน", lat:7.7910, lng:100.1310, mainImage:img("pakpracafe"), phone:"089-7362544", fee:"เครื่องดื่ม 45-120 บาท", description:"คาเฟ่ริมคลองปากประ นั่งชิลชมยอยักษ์ กาแฟดี วิวหลักล้าน" },
+  { id:"s5",  name:"โรงแรมศิวา รอยัล พัทลุง", type:"โรงแรม", district:"อ.เมืองพัทลุง", lat:7.6155, lng:100.0810, mainImage:img("sivaroyal"), phone:"074-621719", fee:"เริ่มต้น 1,200 บาท/คืน", description:"โรงแรมใหญ่กลางเมืองพัทลุง เดินทางสะดวก ใกล้เขาอกทะลุและถนนคนเดิน" },
+  { id:"s6",  name:"The Bed Klangmuang", type:"โรงแรม", district:"อ.เมืองพัทลุง", lat:7.6190, lng:100.0790, mainImage:img("thebed"), phone:"074-615599", fee:"เริ่มต้น 890 บาท/คืน", description:"โรงแรมสไตล์มินิมอลใจกลางเมือง สะอาด ใหม่ ใกล้แหล่งของกินยามค่ำ" },
+  { id:"s7",  name:"ครัวลุงหนวด ลำปำ", type:"ร้านอาหาร", district:"อ.เมืองพัทลุง", lat:7.6320, lng:100.1530, mainImage:img("lungnuad"), phone:"081-9634470", fee:"ซีฟู้ดทะเลสาบ 80-350 บาท", description:"อาหารทะเลสาบสด ๆ ริมหาดลำปำ กุ้งก้ามกรามเผาตัวโต น้ำจิ้มรสเด็ด" },
+  { id:"s8",  name:"Slow Life Coffee เขาอกทะลุ", type:"คาเฟ่", district:"อ.เมืองพัทลุง", lat:7.6240, lng:100.0910, mainImage:img("slowlife"), phone:"095-4402317", fee:"เครื่องดื่ม 40-95 บาท", description:"คาเฟ่เล็ก ๆ วิวเขาอกทะลุเต็ม ๆ เหมาะแวะพักหลังเดินขึ้นเขา" },
+  { id:"s9",  name:"วังหลามรีสอร์ท เขาชัยสน", type:"รีสอร์ท", district:"อ.เขาชัยสน", lat:7.4480, lng:100.1220, mainImage:img("wanglam"), phone:"086-9605128", fee:"เริ่มต้น 700 บาท/คืน", description:"รีสอร์ทเงียบสงบใกล้บ่อน้ำร้อนเขาชัยสน เหมาะพักผ่อนเชิงสุขภาพ" },
+  { id:"s10", name:"ร้านอาหารคุณเลิศ", type:"ร้านอาหาร", district:"อ.เมืองพัทลุง", lat:7.6165, lng:100.0830, mainImage:img("khunlert"), phone:"074-613377", fee:"อาหารตามสั่ง 60-200 บาท", description:"ร้านเก่าแก่คู่เมืองพัทลุง ข้าวยำ-แกงไตปลาตำรับดั้งเดิม" },
+  { id:"s11", name:"ใต้โหนดคาเฟ่", type:"คาเฟ่", district:"อ.ควนขนุน", lat:7.7540, lng:100.0225, mainImage:img("tainodecafe"), phone:"089-4671960", fee:"เครื่องดื่ม 40-100 บาท", description:"คาเฟ่ใต้ร่มตาลโตนดข้างตลาดใต้โหนด ลองน้ำตาลโตนดสดหอมหวาน" },
+  { id:"s12", name:"หนานมดแดงริเวอร์แคมป์", type:"รีสอร์ท", district:"อ.ป่าพะยอม", lat:7.8400, lng:99.9435, mainImage:img("rivercamp"), phone:"086-9573028", fee:"เริ่มต้น 1,000 บาท/คืน", description:"ที่พักริมลำธารในบรรยากาศป่าเขา ตื่นเช้ามาล่องแก่งได้ทันที" },
+  { id:"s13", name:"ครัวนายหนัง กงหรา", type:"ร้านอาหาร", district:"อ.กงหรา", lat:7.3830, lng:99.9420, mainImage:img("nainang"), phone:"087-2903415", fee:"อาหารใต้ 50-180 บาท", description:"อาหารใต้รสจัดจ้านใกล้น้ำตกไพรวัลย์ ผักเหนาะสดจากสวน" },
+  { id:"s14", name:"ลำปำรีสอร์ท", type:"รีสอร์ท", district:"อ.เมืองพัทลุง", lat:7.6345, lng:100.1500, mainImage:img("lampamresort"), phone:"074-611486", fee:"เริ่มต้น 950 บาท/คืน", description:"รีสอร์ทร่มรื่นริมทะเลสาบใกล้หาดแสนสุขลำปำ เงียบสงบเป็นส่วนตัว" },
+];
+
+/* ============================================================
+   💾 DATABASE LAYER — Firebase Realtime DB + localStorage fallback
+   (สไตล์เดียวกับไฟล์ตัวอย่าง: cache ในหน่วยความจำ + realtime sync)
+   คีย์ที่ใช้: places, services, users, checkins
+   ============================================================ */
+let fdb = null;
+const cache = { places:null, services:null, users:null, checkins:null };
+const KEYS = ['places','services','users','checkins'];
+
+let _ready = false, _readyCbs = [];
+function whenReady(cb){ _ready ? cb() : _readyCbs.push(cb) }
+function markReady(){ if(_ready) return; _ready = true; _readyCbs.forEach(f=>f()); _readyCbs = [] }
+
+const DB = {
+  get(key){
+    if(USE_FIREBASE) return Array.isArray(cache[key]) ? cache[key] : [];
+    try{ return JSON.parse(localStorage.getItem(key)) || [] }catch(e){ return [] }
+  },
+  set(key, val){
+    if(USE_FIREBASE){
+      cache[key] = val;          /* อัปเดตแคชทันที ให้ UI ไว */
+      fdb.ref(key).set(val);     /* แล้วเขียนขึ้น Firebase */
+      return;
+    }
+    localStorage.setItem(key, JSON.stringify(val));
+  },
+};
+
+function setConnStatus(t){ const el = document.getElementById('connStatus'); if(el) el.textContent = ' • ' + t }
+
+/* เมื่อข้อมูลเปลี่ยน (จากเครื่องอื่น) → รีเฟรชหน้าที่กำลังเปิดอยู่ */
+function onDataChanged(key){
+  if(key === 'places' || key === 'services') renderPlaces();
+  refreshAdmin();
+  if(document.getElementById('profile-view').classList.contains('active')) renderProfile();
+  if(state.currentPlace && (key === 'checkins')) updateCheckinCount();
+}
+
+const DATA_VERSION = '1';
+
+function initData(){
+  if(USE_FIREBASE){
+    firebase.initializeApp(firebaseConfig);
+    fdb = firebase.database();
+    setConnStatus('กำลังเชื่อมต่อ Firebase…');
+
+    KEYS.forEach(key => {
+      fdb.ref(key).on('value', snap => {
+        const v = snap.val();
+        cache[key] = v ? (Array.isArray(v) ? v.filter(Boolean) : Object.values(v)) : [];
+        /* DB ว่าง (เพิ่งสร้างโปรเจกต์) → seed ข้อมูลตัวอย่างครั้งเดียว */
+        if(key === 'places' && cache.places.length === 0 && !initData._seededP){
+          initData._seededP = true; fdb.ref('places').set(DEFAULT_PLACES);
+        }
+        if(key === 'services' && cache.services.length === 0 && !initData._seededS){
+          initData._seededS = true; fdb.ref('services').set(DEFAULT_SERVICES);
+        }
+        if(key === 'places') markReady();
+        onDataChanged(key);
+      });
+    });
+
+    fdb.ref('.info/connected').on('value', s => {
+      setConnStatus(s.val() ? 'เชื่อมต่อ Firebase แล้ว ☁️' : 'หลุดการเชื่อมต่อ กำลังลองใหม่…');
+    });
+    return;
+  }
+
+  /* โหมดออฟไลน์ (localStorage) */
+  if(localStorage.getItem('data_version') !== DATA_VERSION){
+    DB.set('places', DEFAULT_PLACES);
+    DB.set('services', DEFAULT_SERVICES);
+    localStorage.setItem('data_version', DATA_VERSION);
+  }
+  if(!localStorage.getItem('users'))    DB.set('users', []);
+  if(!localStorage.getItem('checkins')) DB.set('checkins', []);
+  setConnStatus('โหมดออฟไลน์ (localStorage)');
+  markReady();
+}
+
+/* ============================================================
+   🧰 Utilities
+   ============================================================ */
+const state = { activeCategory:null, currentPlace:null, svcType:"all", adminTab:"places" };
+const $ = (id) => document.getElementById(id);
+const esc = (s="") => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const FALLBACK_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400'><rect width='100%' height='100%' fill='%23d8f3dc'/><text x='50%' y='54%' font-size='48' text-anchor='middle'>🏞️</text></svg>";
+const SVC_ICON = { "ร้านอาหาร":"🍜", "คาเฟ่":"☕", "โรงแรม":"🏨", "รีสอร์ท":"🏝️" };
+
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2600);
+}
+
+function distanceKm(lat1,lng1,lat2,lng2){
+  if([lat1,lng1,lat2,lng2].some(v => typeof v !== "number" || isNaN(v))) return null;
+  const R = 6371, rad = Math.PI/180;
+  const dLat = (lat2-lat1)*rad, dLng = (lng2-lng1)*rad;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*rad)*Math.cos(lat2*rad)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+const kmText = (km) => km == null ? "" : `${km.toFixed(1)} กม.`;
+
+/* ============================================================
+   🔑 SESSION / AUTH — แบบง่าย (เหมือนไฟล์ตัวอย่าง)
+   บัญชีเก็บใน DB คีย์ 'users', session จำใน localStorage
+   ============================================================ */
+function currentUser(){ try{ return JSON.parse(localStorage.getItem('session')) }catch(e){ return null } }
+function setSession(u){ localStorage.setItem('session', JSON.stringify(u)) }
+function clearSession(){ localStorage.removeItem('session') }
+
+function switchAuth(mode){
+  $("loginForm").style.display    = mode === 'login'    ? 'block' : 'none';
+  $("registerForm").style.display = mode === 'register' ? 'block' : 'none';
+  showMsg('liMsg',''); showMsg('rgMsg','');
+}
+function showMsg(id, text, ok){
+  const el = $(id);
+  el.className = 'form-msg' + (text ? (ok ? ' success' : ' error') : '');
+  el.textContent = text;
+}
+
+function doRegister(){
+  const user  = $("rgUser").value.trim();
+  const pass  = $("rgPass").value;
+  const pass2 = $("rgPass2").value;
+  if(!user || !pass) return showMsg('rgMsg','กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบถ้วน');
+  if(pass.length < 4) return showMsg('rgMsg','รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร');
+  if(pass !== pass2)  return showMsg('rgMsg','รหัสผ่านทั้งสองช่องไม่ตรงกัน');
+
+  const users = DB.get('users');
+  if(users.some(u => u.username.toLowerCase() === user.toLowerCase()))
+    return showMsg('rgMsg','ชื่อผู้ใช้นี้ถูกใช้งานแล้ว กรุณาเลือกชื่ออื่น');
+
+  /* ⭐ กฎแอดมินคนแรก: ยังไม่มีผู้ใช้เลย → คนแรกได้ role admin อัตโนมัติ */
+  const role = users.length === 0 ? 'admin' : 'user';
+  users.push({ username:user, password:pass, role, createdAt:new Date().toLocaleDateString('th-TH') });
+  DB.set('users', users);
+  setSession({ username:user, role });
+  renderUserBox();
+  toast(role === 'admin' ? `🎉 ยินดีต้อนรับคุณ ${user} — คุณคือแอดมินคนแรกของระบบ!` : `🎉 สมัครสมาชิกสำเร็จ ยินดีต้อนรับคุณ ${user}`);
+  go('home');
+}
+
+function doLogin(){
+  const user = $("liUser").value.trim();
+  const pass = $("liPass").value;
+  if(!user || !pass) return showMsg('liMsg','กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+  const found = DB.get('users').find(u => u.username === user && u.password === pass);
+  if(!found) return showMsg('liMsg','ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+  setSession({ username:found.username, role:found.role });
+  renderUserBox();
+  toast(`✅ ยินดีต้อนรับกลับมาคุณ ${found.username}`);
+  go(found.role === 'admin' ? 'admin' : 'home');
+}
+
+function doLogout(){
+  clearSession();
+  renderUserBox();
+  go('home');
+  toast('👋 ออกจากระบบแล้ว');
+}
+
+/* อัปเดตปุ่มบน Navbar ตามสถานะล็อกอิน */
+function renderUserBox(){
+  const u = currentUser();
+  $("btnAuth").classList.toggle('hidden', !!u);
+  $("btnProfile").classList.toggle('hidden', !u);
+  $("btnAdmin").classList.toggle('hidden', !(u && u.role === 'admin'));
+  if(u) $("navUsername").textContent = u.username;
+}
+
+/* ============================================================
+   ✅ ระบบเช็คอิน + ประวัติ
+   ============================================================ */
+function doCheckin(){
+  const u = currentUser();
+  if(!u){ toast('🙏 กรุณาเข้าสู่ระบบก่อนเช็คอิน'); go('auth'); return }
+  const p = state.currentPlace;
+  if(!p) return;
+
+  const today = new Date().toLocaleDateString('th-TH');
+  const list = DB.get('checkins');
+
+  /* กันเช็คอินซ้ำ: คนเดิม + สถานที่เดิม + วันเดียวกัน */
+  if(list.some(c => c.username === u.username && c.placeId === p.id && c.date === today))
+    return toast('📌 วันนี้คุณเช็คอินที่นี่ไปแล้ว');
+
+  list.push({
+    id: Date.now(),
+    username: u.username,
+    placeId: p.id,
+    placeName: p.name,
+    district: p.district || '',
+    date: today,
+    time: new Date().toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' }) + ' น.',
+  });
+  DB.set('checkins', list);
+  updateCheckinCount();
+  toast(`✅ เช็คอิน "${p.name}" สำเร็จ!`);
+}
+
+/* โชว์จำนวนเช็คอินรวมของสถานที่นี้ใต้ปุ่ม */
+function updateCheckinCount(){
+  const p = state.currentPlace;
+  if(!p) return;
+  const n = DB.get('checkins').filter(c => c.placeId === p.id).length;
+  $("checkinCount").textContent = n > 0 ? `👣 มีนักท่องเที่ยวเช็คอินที่นี่แล้ว ${n} ครั้ง` : 'ยังไม่มีใครเช็คอิน มาเป็นคนแรกกันเถอะ!';
+}
+
+/* ============================================================
+   👤 โปรไฟล์ + ประวัติเช็คอินของฉัน
+   ============================================================ */
+function openProfile(){
+  const u = currentUser();
+  if(!u){ go('auth'); return }
+  renderProfile();
+  go('profile');
+}
+
+function renderProfile(){
+  const u = currentUser();
+  if(!u) return;
+  $("pfName").textContent = u.username;
+  $("pfRole").textContent = 'สิทธิ์: ' + (u.role === 'admin' ? 'ผู้ดูแลระบบ 🛠️' : 'สมาชิกทั่วไป');
+  const my = DB.get('checkins').filter(c => c.username === u.username).slice().reverse();
+  $("pfCheckinCount").textContent = my.length;
+  $("pfCheckinBody").innerHTML = my.length
+    ? my.map((c,i) => `<tr><td>${i+1}</td><td>${esc(c.placeName)}</td><td>${esc(c.district)}</td><td>${esc(c.date)}</td><td>${esc(c.time)}</td></tr>`).join('')
+    : `<tr><td colspan="5" style="text-align:center;color:var(--text-sub);padding:1.5rem">ยังไม่มีประวัติเช็คอิน — ไปเที่ยวแล้วกดเช็คอินได้เลย!</td></tr>`;
+}
+
+/* ============================================================
+   🧭 SPA ROUTER
+   ============================================================ */
+function go(view){
+  const u = currentUser();
+  if(view === 'admin' && (!u || u.role !== 'admin')){
+    toast('⛔ เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น');
+    view = u ? 'home' : 'auth';
+  }
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  $(view + "-view").classList.add("active");
+  document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("active", a.dataset.nav === view));
+  $("navLinks").classList.remove("open");
+  if(view === 'admin') refreshAdmin();
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+/* ============================================================
+   🏠 หน้าแรก: Grid / ค้นหา / กรองหมวด
+   ============================================================ */
+function renderPlaces(){
+  const grid = $("placesGrid");
+  let list = DB.get('places');
+  if(state.activeCategory) list = list.filter(p => p.category === state.activeCategory);
+  const q = $("searchInput").value.trim();
+  if(q) list = list.filter(p => (p.name||"").includes(q) || (p.district||"").includes(q) || (p.category||"").includes(q));
+
+  grid.innerHTML = list.length ? list.map(p => `
+    <article class="place-card" onclick="openDetail('${p.id}')">
+      <img class="place-img" src="${esc(p.mainImage||"")}" alt="${esc(p.name)}" loading="lazy" onerror="this.src=FALLBACK_IMG">
+      <div class="place-body">
+        <div class="place-name">${esc(p.name)}</div>
+        <div class="place-district">${esc(p.district||"")}</div>
+        <div class="place-rating"><span class="star">★</span> ${Number(p.rating??0).toFixed(1)}</div>
+      </div>
+    </article>`).join("")
+    : `<div class="empty-note">🌱 ยังไม่พบสถานที่ในเงื่อนไขนี้</div>`;
+}
+
+function filterCategory(cat){
+  state.activeCategory = (state.activeCategory === cat) ? null : cat;
+  document.querySelectorAll(".cat").forEach(b => b.classList.toggle("active", b.dataset.cat === state.activeCategory));
+  $("placesTitle").textContent = state.activeCategory ? `หมวดหมู่: ${state.activeCategory}` : "สถานที่แนะนำ";
+  renderPlaces();
+}
+
+function doSearch(){
+  go("home");
+  $("placesTitle").textContent = $("searchInput").value.trim() ? `ผลการค้นหา "${$("searchInput").value.trim()}"` : "สถานที่แนะนำ";
+  renderPlaces();
+  $("placesGrid").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+function goPlaces(){
+  state.activeCategory = null;
+  $("searchInput").value = "";
+  document.querySelectorAll(".cat").forEach(b => b.classList.remove("active"));
+  $("placesTitle").textContent = "สถานที่ท่องเที่ยวทั้งหมด";
+  go("home");
+  renderPlaces();
+  $("placesGrid").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+function focusSearch(){ go("home"); setTimeout(()=> $("searchInput").focus(), 300); }
+function scrollToSection(id){ setTimeout(()=> $(id === "features" ? "featuresStrip" : id)?.scrollIntoView({ behavior:"smooth" }), 150); }
+
+/* ============================================================
+   📄 หน้ารายละเอียด + ใกล้เคียง + บริการ + แผนที่
+   ============================================================ */
+function openDetail(id){
+  const p = DB.get('places').find(x => x.id === id);
+  if(!p) return;
+  state.currentPlace = p;
+  state.svcType = "all";
+
+  $("bcName").textContent    = p.name;
+  $("dImg").src              = p.mainImage || FALLBACK_IMG;
+  $("dImg").onerror          = function(){ this.src = FALLBACK_IMG };
+  $("dName").textContent     = p.name;
+  $("dDistrict").textContent = p.district || "-";
+  $("dRating").textContent   = Number(p.rating ?? 0).toFixed(1);
+  $("dDesc").textContent     = p.description || "ยังไม่มีคำอธิบาย";
+  $("dHours").textContent    = p.openHours || "-";
+  $("dFee").textContent      = p.fee || "-";
+  $("dPhone").textContent    = p.phone || "-";
+
+  updateCheckinCount();
+  renderNearbyPlaces(p);
+  document.querySelectorAll("#svcFilter .chip").forEach(c => c.classList.toggle("active", c.dataset.type === "all"));
+  renderNearbyServices(p);
+  renderMap(p);
+  go("detail");
+}
+
+function renderNearbyPlaces(p){
+  const nearby = DB.get('places')
+    .filter(x => x.id !== p.id)
+    .map(x => ({ ...x, km: distanceKm(p.lat, p.lng, x.lat, x.lng) }))
+    .sort((a,b) => (a.km ?? 9e9) - (b.km ?? 9e9))
+    .slice(0, 8);
+
+  $("nearbyRow").innerHTML = nearby.length ? nearby.map(n => `
+    <div class="nearby-card" onclick="openDetail('${n.id}')">
+      ${n.km != null ? `<span class="km-badge">${kmText(n.km)}</span>` : ""}
+      <img src="${esc(n.mainImage||"")}" alt="${esc(n.name)}" loading="lazy" onerror="this.src=FALLBACK_IMG">
+      <div class="nb-body">
+        <div class="nb-name">${esc(n.name)}</div>
+        <div class="nb-sub">${esc(n.district||"")} • ★ ${Number(n.rating??0).toFixed(1)}</div>
+        ${n.km != null ? `<div class="nb-km">🚗 ห่างประมาณ ${kmText(n.km)}</div>` : ""}
+      </div>
+    </div>`).join("")
+    : `<div class="empty-note" style="grid-auto-columns:100%">ยังไม่มีสถานที่ใกล้เคียง</div>`;
+}
+
+function renderNearbyServices(p){
+  let list = DB.get('services')
+    .map(s => ({ ...s, km: distanceKm(p.lat, p.lng, s.lat, s.lng) }))
+    .filter(s => s.km == null || s.km <= 30)
+    .sort((a,b) => (a.km ?? 9e9) - (b.km ?? 9e9));
+  if(state.svcType !== "all") list = list.filter(s => s.type === state.svcType);
+
+  $("svcGrid").innerHTML = list.length ? list.slice(0, 8).map(s => `
+    <div class="svc-card">
+      <img src="${esc(s.mainImage||"")}" alt="${esc(s.name)}" loading="lazy" onerror="this.src=FALLBACK_IMG">
+      <div class="svc-body">
+        <div class="svc-type">${SVC_ICON[s.type]||"📍"} ${esc(s.type||"")}</div>
+        <div class="svc-name">${esc(s.name)}</div>
+        <div class="svc-sub">${esc(s.district||"")}${s.fee ? " • " + esc(s.fee) : ""}</div>
+        <div class="svc-foot">
+          <span class="svc-km">${s.km != null ? "🚗 " + kmText(s.km) : ""}</span>
+          <span class="svc-tel">${esc(s.phone||"")}</span>
+        </div>
+      </div>
+    </div>`).join("")
+    : `<div class="empty-note">ยังไม่มีบริการประเภทนี้ในบริเวณใกล้เคียง</div>`;
+}
+
+function filterService(type){
+  state.svcType = type;
+  document.querySelectorAll("#svcFilter .chip").forEach(c => c.classList.toggle("active", c.dataset.type === type));
+  if(state.currentPlace) renderNearbyServices(state.currentPlace);
+}
+
+/* ============================================================
+   🗺️ แผนที่ Leaflet + OpenStreetMap (ใช้งานได้จริง)
+   ============================================================ */
+let map = null, markerLayer = null;
+
+function emojiPin(emoji, isMain=false){
+  return L.divIcon({
+    className:"",
+    html:`<div class="pin-marker${isMain ? " pin-main" : ""}">${emoji}</div>`,
+    iconSize:   isMain ? [40,40] : [30,30],
+    iconAnchor: isMain ? [20,36] : [15,26],
+    popupAnchor:[0, isMain ? -34 : -24],
+  });
+}
+function popupHtml({name, sub, km, btn}){
+  return `<div class="popup-name">${esc(name)}</div>
+          <div class="popup-sub">${esc(sub||"")}</div>
+          ${km != null ? `<div class="popup-km">🚗 ห่างประมาณ ${kmText(km)}</div>` : ""}
+          ${btn || ""}`;
+}
+
+function renderMap(p){
+  if(typeof L === "undefined"){
+    $("mapCanvas").innerHTML = `<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-sub)">⚠️ โหลดแผนที่ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต</div>`;
+    return;
+  }
+  const hasCoord = typeof p.lat === "number" && !isNaN(p.lat);
+  const center = hasCoord ? [p.lat, p.lng] : [7.6167, 100.0833];
+
+  $("mapOpenLink").href = hasCoord
+    ? `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + " พัทลุง")}`;
+
+  if(!map){
+    map = L.map("mapCanvas", { scrollWheelZoom:false });
+    map.on("click", () => map.scrollWheelZoom.enable());
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom:19,
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+    markerLayer = L.layerGroup().addTo(map);
+  }
+
+  markerLayer.clearLayers();
+  const bounds = [];
+
+  if(hasCoord){
+    L.marker(center, { icon:emojiPin("📍", true), zIndexOffset:1000 })
+      .bindPopup(popupHtml({ name:p.name, sub:`${p.district||""} จ.พัทลุง` }))
+      .addTo(markerLayer).openPopup();
+    bounds.push(center);
+  }
+
+  DB.get('places')
+    .filter(x => x.id !== p.id && typeof x.lat === "number" && !isNaN(x.lat))
+    .map(x => ({ ...x, km: distanceKm(p.lat, p.lng, x.lat, x.lng) }))
+    .sort((a,b) => (a.km ?? 9e9) - (b.km ?? 9e9))
+    .slice(0, 8)
+    .forEach(n => {
+      L.marker([n.lat, n.lng], { icon:emojiPin("🏕️") })
+        .bindPopup(popupHtml({ name:n.name, sub:n.district, km:n.km, btn:`<span class="popup-btn" onclick="openDetail('${n.id}')">ดูรายละเอียด ›</span>` }))
+        .addTo(markerLayer);
+      bounds.push([n.lat, n.lng]);
+    });
+
+  DB.get('services')
+    .filter(s => typeof s.lat === "number" && !isNaN(s.lat))
+    .map(s => ({ ...s, km: distanceKm(p.lat, p.lng, s.lat, s.lng) }))
+    .filter(s => s.km != null && s.km <= 30)
+    .sort((a,b) => a.km - b.km)
+    .slice(0, 10)
+    .forEach(s => {
+      L.marker([s.lat, s.lng], { icon:emojiPin(SVC_ICON[s.type] || "📌") })
+        .bindPopup(popupHtml({ name:s.name, sub:`${s.type||""} • ${s.district||""}${s.phone ? " • ☎ " + s.phone : ""}`, km:s.km }))
+        .addTo(markerLayer);
+      bounds.push([s.lat, s.lng]);
+    });
+
+  if(bounds.length > 1) map.fitBounds(bounds, { padding:[45,45], maxZoom:14 });
+  else map.setView(center, 14);
+
+  /* detail-view เพิ่งโผล่จาก display:none → ให้ Leaflet คำนวณขนาดใหม่ */
+  setTimeout(() => {
+    map.invalidateSize();
+    if(bounds.length > 1) map.fitBounds(bounds, { padding:[45,45], maxZoom:14 });
+    else map.setView(center, 14);
+  }, 350);
+}
+
+/* ============================================================
+   🛠️ ADMIN — สถิติ + CRUD สถานที่/บริการ + จัดการสมาชิก + เช็คอิน
+   ============================================================ */
+const PLACE_CATS   = ["ธรรมชาติ","วัด/ศาสนา","คาเฟ่","ถ่ายรูป","ครอบครัว"];
+const SERVICE_CATS = ["ร้านอาหาร","คาเฟ่","โรงแรม","รีสอร์ท"];
+
+function onKindChange(){
+  const cats = $("fKind").value === "service" ? SERVICE_CATS : PLACE_CATS;
+  $("fCategory").innerHTML = cats.map(c => `<option value="${c}">${SVC_ICON[c]||"🏞️"} ${c}</option>`).join("");
+}
+
+function formMsg(msg, ok){
+  const el = $("formMsg");
+  el.className = "form-msg" + (msg ? (ok ? " success" : " error") : "");
+  el.textContent = msg;
+}
+
+function previewImage(){
+  const url = $("fImage").value.trim();
+  const im = $("fPreview");
+  if(!url){ im.style.display = "none"; return }
+  im.src = url;
+  im.style.display = "block";
+  im.onerror = () => { im.style.display = "none" };
+}
+
+function resetForm(){
+  ["fId","fName","fDistrict","fDesc","fHours","fFee","fPhone","fLat","fLng","fImage"].forEach(id => $(id).value = "");
+  $("fKind").value = (state.adminTab === "services") ? "service" : "place";
+  $("fKind").disabled = false;
+  onKindChange();
+  $("fRating").value = "4.5";
+  $("fPreview").style.display = "none";
+  $("formTitle").textContent = "➕ เพิ่มข้อมูลใหม่";
+  $("fCancel").classList.add("hidden");
+  formMsg("");
+}
+
+function saveItem(){
+  const u = currentUser();
+  if(!u || u.role !== 'admin') return formMsg("⛔ เฉพาะแอดมินเท่านั้น");
+  const name = $("fName").value.trim();
+  const district = $("fDistrict").value.trim();
+  const lat = parseFloat($("fLat").value);
+  const lng = parseFloat($("fLng").value);
+  if(!name || !district) return formMsg("กรุณากรอกชื่อและอำเภอ");
+  if(isNaN(lat) || isNaN(lng)) return formMsg("กรุณากรอกพิกัด Lat/Lng (ใช้คำนวณระยะทางและแผนที่)");
+
+  const kind = $("fKind").value;
+  const key  = kind === "service" ? "services" : "places";
+  const editingId = $("fId").value;
+  const list = DB.get(key);
+
+  const data = {
+    id: editingId || (kind === "service" ? "s" : "p") + Date.now(),
+    name, district, lat, lng,
+    description: $("fDesc").value.trim(),
+    rating: Math.min(5, Math.max(0, parseFloat($("fRating").value) || 0)),
+    openHours: $("fHours").value.trim(),
+    fee: $("fFee").value.trim(),
+    phone: $("fPhone").value.trim(),
+    mainImage: $("fImage").value.trim(),
+  };
+  if(kind === "service") data.type = $("fCategory").value;
+  else data.category = $("fCategory").value;
+
+  if(editingId){
+    const idx = list.findIndex(x => x.id === editingId);
+    if(idx >= 0) list[idx] = { ...list[idx], ...data };
+    toast("✅ แก้ไขข้อมูลเรียบร้อย");
+  } else {
+    list.push(data);
+    toast("✅ เพิ่มข้อมูลใหม่เรียบร้อย");
+  }
+  DB.set(key, list);
+  resetForm();
+  renderPlaces();
+  refreshAdmin();
+}
+
+function editItem(kind, id){
+  const p = DB.get(kind === "service" ? "services" : "places").find(x => x.id === id);
+  if(!p) return;
+  $("fKind").value = kind;
+  onKindChange();
+  $("fKind").disabled = true;
+  $("fId").value = p.id;
+  $("fName").value = p.name || "";
+  $("fDistrict").value = p.district || "";
+  $("fCategory").value = kind === "service" ? (p.type || "ร้านอาหาร") : (p.category || "ธรรมชาติ");
+  $("fDesc").value = p.description || "";
+  $("fLat").value = p.lat ?? "";
+  $("fLng").value = p.lng ?? "";
+  $("fRating").value = p.rating ?? 4.5;
+  $("fHours").value = p.openHours || "";
+  $("fFee").value = p.fee || "";
+  $("fPhone").value = p.phone || "";
+  $("fImage").value = p.mainImage || "";
+  previewImage();
+  $("formTitle").textContent = "✏️ แก้ไข: " + p.name;
+  $("fCancel").classList.remove("hidden");
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+function deleteItem(kind, id){
+  const key = kind === "service" ? "services" : "places";
+  const p = DB.get(key).find(x => x.id === id);
+  if(!p || !confirm(`ยืนยันลบ "${p.name}" ?`)) return;
+  DB.set(key, DB.get(key).filter(x => x.id !== id));
+  toast("🗑️ ลบข้อมูลเรียบร้อย");
+  renderPlaces();
+  refreshAdmin();
+}
+
+/* 👥 จัดการสมาชิก */
+function adminDelUser(username){
+  const me = currentUser();
+  if(me && me.username === username) return toast('⛔ ไม่สามารถลบบัญชีของตัวเองได้');
+  if(!confirm(`ยืนยันการลบผู้ใช้ "${username}" ? (ประวัติเช็คอินของผู้ใช้นี้จะถูกลบด้วย)`)) return;
+  DB.set('users', DB.get('users').filter(u => u.username !== username));
+  DB.set('checkins', DB.get('checkins').filter(c => c.username !== username));
+  toast('🗑️ ลบผู้ใช้เรียบร้อย');
+  refreshAdmin();
+}
+
+/* ✅ จัดการเช็คอิน */
+function adminDelCheckin(id){
+  if(!confirm('ยืนยันการลบรายการเช็คอินนี้?')) return;
+  DB.set('checkins', DB.get('checkins').filter(c => c.id !== id));
+  refreshAdmin();
+}
+
+function setAdminTab(tab){
+  state.adminTab = tab;
+  ['places','services','users','checkins'].forEach(t => {
+    $("tab-" + t).className = "btn " + (t === tab ? "btn-primary" : "btn-outline");
+  });
+  refreshAdmin();
+}
+
+function refreshAdmin(){
+  /* 📊 สถิติ: สมาชิกกี่คน / เช็คอินกี่ครั้ง / ข้อมูลเท่าไร */
+  $("statUsers").textContent    = DB.get('users').length;
+  $("statCheckins").textContent = DB.get('checkins').length;
+  $("statPlaces").textContent   = DB.get('places').length;
+  $("statServices").textContent = DB.get('services').length;
+  const me = currentUser();
+  if(me) $("adminName").textContent = me.username;
+
+  const head = $("adminTableHead"), body = $("adminTableBody");
+  const tab = state.adminTab;
+
+  if(tab === 'places' || tab === 'services'){
+    const isSvc = tab === 'services';
+    const kind = isSvc ? 'service' : 'place';
+    const list = DB.get(tab);
+    head.innerHTML = `<tr><th>รูป</th><th>ชื่อ</th><th>อำเภอ</th><th>หมวดหมู่</th><th>คะแนน</th><th>จัดการ</th></tr>`;
+    body.innerHTML = list.length ? list.map(p => `
+      <tr>
+        <td><img src="${esc(p.mainImage||"")}" alt="" onerror="this.style.visibility='hidden'"></td>
+        <td>${esc(p.name)}</td>
+        <td>${esc(p.district||"")}</td>
+        <td><span class="badge">${esc(isSvc ? (p.type||"-") : (p.category||"-"))}</span></td>
+        <td>★ ${Number(p.rating??0).toFixed(1)}</td>
+        <td><div class="tbl-actions">
+          <button class="btn btn-light btn-sm" onclick="editItem('${kind}','${p.id}')">แก้ไข</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem('${kind}','${p.id}')">ลบ</button>
+        </div></td>
+      </tr>`).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--text-sub);padding:1.5rem">ยังไม่มีข้อมูล</td></tr>`;
+  }
+
+  if(tab === 'users'){
+    const users = DB.get('users');
+    head.innerHTML = `<tr><th>#</th><th>ชื่อผู้ใช้</th><th>สิทธิ์</th><th>วันที่สมัคร</th><th>เช็คอิน (ครั้ง)</th><th>จัดการ</th></tr>`;
+    body.innerHTML = users.length ? users.map((u,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>👤 ${esc(u.username)}</td>
+        <td><span class="badge ${u.role === 'admin' ? 'amber' : ''}">${u.role === 'admin' ? '🛠️ แอดมิน' : 'สมาชิก'}</span></td>
+        <td>${esc(u.createdAt||"-")}</td>
+        <td>${DB.get('checkins').filter(c => c.username === u.username).length}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="adminDelUser('${esc(u.username)}')">ลบ</button></td>
+      </tr>`).join("") : `<tr><td colspan="6" style="text-align:center;color:var(--text-sub);padding:1.5rem">ยังไม่มีสมาชิก</td></tr>`;
+  }
+
+  if(tab === 'checkins'){
+    const list = DB.get('checkins').slice().reverse();
+    head.innerHTML = `<tr><th>#</th><th>ผู้ใช้</th><th>สถานที่</th><th>อำเภอ</th><th>วันที่</th><th>เวลา</th><th>จัดการ</th></tr>`;
+    body.innerHTML = list.length ? list.map((c,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>👤 ${esc(c.username)}</td>
+        <td>${esc(c.placeName)}</td>
+        <td>${esc(c.district)}</td>
+        <td>${esc(c.date)}</td>
+        <td>${esc(c.time)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="adminDelCheckin(${c.id})">ลบ</button></td>
+      </tr>`).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--text-sub);padding:1.5rem">ยังไม่มีข้อมูลเช็คอิน</td></tr>`;
+  }
+}
+
+/* ============================================================
+   🚀 เริ่มต้นแอป
+   ============================================================ */
+initData();
+renderUserBox();
+onKindChange();
+$("searchInput").addEventListener("input", renderPlaces);
+renderPlaces();                       /* วาดทันที (โหมดออฟไลน์ / แคชเดิม) */
+whenReady(() => renderPlaces());      /* วาดอีกครั้งเมื่อข้อมูล Firebase ก้อนแรกมาถึง */
+</script>
+</body>
+</html>
