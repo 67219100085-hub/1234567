@@ -421,6 +421,15 @@ footer{padding:0;text-align:left}
 .lang-note{font-size:.7rem;color:var(--text-sub);margin-top:.35rem;line-height:1.4}
 .lang-select{padding:.5rem .9rem;border:1.5px solid var(--gray-line);border-radius:999px;background:#fff;font-size:.85rem;font-weight:600;outline:none;cursor:pointer;font-family:inherit}
 .lang-select:focus{border-color:var(--green-light)}
+/* 🔎 กล่องตรวจระบบเสียง */
+.voice-diag{display:none;margin-top:.6rem;padding:.7rem .8rem;background:var(--gray-bg);border:1px solid var(--gray-line);border-radius:12px;font-size:.76rem;max-height:260px;overflow-y:auto}
+.dg-title{font-weight:700;color:var(--green-dark);margin-bottom:.5rem;font-size:.82rem}
+.dg-row{display:flex;gap:.5rem;align-items:flex-start;padding:.3rem 0;border-bottom:1px dashed var(--gray-line);line-height:1.5}
+.dg-row:last-of-type{border-bottom:none}
+.dg-ic{flex-shrink:0}
+.dg-row small{color:var(--text-sub);font-weight:300}
+.dg-net{padding:.4rem 0;line-height:1.5;border-bottom:1px dashed var(--gray-line)}
+.dg-btns{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.6rem}
 
 /* ============ ⚙️ ทั่วไป / Responsive ============ */
 .view{display:none;animation:fadeIn .3s ease}
@@ -936,11 +945,13 @@ footer{padding:0;text-align:left}
       <button onclick="mascotReadPlace()" id="btnMascotRead">🔊 อ่านให้ฟัง</button>
       <button onclick="stopSpeak()">⏹ หยุด</button>
       <button onclick="mascotTip()">💡 เกร็ดน่ารู้</button>
+      <button onclick="openVoiceDiag()">🔎 ตรวจเสียง</button>
     </div>
     <!-- 🌐 เลือกภาษาที่ให้น้องโนราห์อ่าน -->
     <div class="lang-row" id="langRow"></div>
     <select class="lang-select" id="voiceSelect" style="width:100%;margin-top:.45rem;font-size:.78rem;padding:.35rem .7rem" onchange="setVoiceMode(this.value)"></select>
     <div class="lang-note" id="langNote"></div>
+    <div class="voice-diag" id="voiceDiag"></div>
   </div>
 </div>
 <button class="mascot-call" id="mascotCall" title="เรียกน้องโนราห์" onclick="showMascot(true)">👘</button>
@@ -1704,6 +1715,16 @@ function setLang(key, announce){
    ชั้นที่ 2 (สำรอง): เสียงในเครื่อง (Web Speech API) ใช้เมื่อออฟไลน์หรือโหลดเสียงไม่ได้
    ============================================================ */
 const TTS_LANG = { th:'th', en:'en', zh:'zh-CN', ja:'ja', ko:'ko', fr:'fr' };
+
+/* 🌐 แหล่งเสียงออนไลน์หลายทาง — ถ้าทางแรกใช้ไม่ได้จะไล่ลองทางถัดไปให้อัตโนมัติ */
+const TTS_SOURCES = [
+  { name:'Google (gtx)',  url:(t,l) => `https://translate.googleapis.com/translate_tts?ie=UTF-8&client=gtx&tl=${encodeURIComponent(l)}&q=${encodeURIComponent(t)}` },
+  { name:'Google (tw-ob)',url:(t,l) => `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(l)}&q=${encodeURIComponent(t)}` },
+  { name:'Google (com)',  url:(t,l) => `https://translate.google.com/translate_tts?ie=UTF-8&client=gtx&tl=${encodeURIComponent(l)}&q=${encodeURIComponent(t)}` },
+];
+let ttsSrcIdx = parseInt(localStorage.getItem('ttsSrc') || '0', 10) || 0;
+const ttsUrl = (text, tl) => TTS_SOURCES[ttsSrcIdx % TTS_SOURCES.length].url(text, tl);
+
 let audioQueue = [], audioIdx = 0, curAudio = null, onlineFailed = false;
 const useOnlineVoice = () => localStorage.getItem('voiceMode') !== 'device';
 
@@ -1741,40 +1762,114 @@ function chunkText(text, size = 180){
   return out.length ? out : [s.slice(0, size)];
 }
 
-function ttsUrl(text, tl){
-  return 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob'
-       + '&tl=' + encodeURIComponent(tl) + '&q=' + encodeURIComponent(text);
-}
-
 /* เล่นเสียงออนไลน์ทีละท่อนต่อกัน */
 function playOnline(text, key){
   const tl = TTS_LANG[key] || 'th';
-  audioQueue = chunkText(text).map(t => ttsUrl(t, tl));
+  audioQueue = chunkText(text).map(t => ({ text:t, tl }));
   audioIdx = 0;
   setTalking(true);
   playNextChunk();
 }
 
-function playNextChunk(){
+function playNextChunk(tries = 0){
   if(audioIdx >= audioQueue.length){ setTalking(false); curAudio = null; return }
-  const a = new Audio(audioQueue[audioIdx++]);
+  const item = audioQueue[audioIdx];
+  const a = new Audio(ttsUrl(item.text, item.tl));
+  a.crossOrigin = 'anonymous';
   curAudio = a;
-  a.onended = () => { if(curAudio === a) playNextChunk() };
+  a.onended = () => { if(curAudio === a){ audioIdx++; playNextChunk() } };
   a.onerror = () => {
-    /* โหลดเสียงออนไลน์ไม่ได้ (เช่น ไม่มีเน็ต) → สลับไปใช้เสียงในเครื่องแทน */
-    if(!onlineFailed){
-      onlineFailed = true;
-      console.warn('เสียงออนไลน์ใช้ไม่ได้ → สลับไปใช้เสียงในเครื่อง');
-      const txt = $("mascotText").textContent;
-      setTalking(false);
-      speakDevice(txt);
-    } else setTalking(false);
+    if(curAudio !== a) return;
+    /* ลองแหล่งเสียงถัดไปก่อน (สูงสุดเท่าจำนวนแหล่งที่มี) */
+    if(tries < TTS_SOURCES.length - 1){
+      ttsSrcIdx = (ttsSrcIdx + 1) % TTS_SOURCES.length;
+      localStorage.setItem('ttsSrc', String(ttsSrcIdx));
+      console.warn('เสียงออนไลน์ล้มเหลว → ลองแหล่ง: ' + TTS_SOURCES[ttsSrcIdx].name);
+      playNextChunk(tries + 1);
+      return;
+    }
+    /* หมดทุกแหล่ง → สลับไปใช้เสียงในเครื่อง */
+    onlineFailed = true;
+    console.warn('เสียงออนไลน์ใช้ไม่ได้ทุกแหล่ง → ใช้เสียงในเครื่องแทน');
+    const txt = $("mascotText").textContent;
+    setTalking(false);
+    speakDevice(txt);
   };
   a.play().catch(() => {
-    /* บางเบราว์เซอร์ต้องให้ผู้ใช้กดปุ่มก่อนถึงเล่นเสียงได้ */
     setTalking(false);
     toast('🔇 กดปุ่ม 🔊 อีกครั้งเพื่อเริ่มเสียงนะคะ');
   });
+}
+
+/* ============================================================
+   🔎 เครื่องมือตรวจระบบเสียง — กดแล้วรู้ทันทีว่าติดตรงไหน
+   ============================================================ */
+function openVoiceDiag(){
+  const box = $("voiceDiag");
+  box.style.display = box.style.display === 'block' ? 'none' : 'block';
+  if(box.style.display !== 'block') return;
+  runVoiceDiag();
+}
+
+function diagLine(icon, label, detail){
+  return `<div class="dg-row"><span class="dg-ic">${icon}</span><div><b>${label}</b>${detail ? '<br><small>' + detail + '</small>' : ''}</div></div>`;
+}
+
+function runVoiceDiag(){
+  const box = $("voiceDiag");
+  const ua = navigator.userAgent;
+  const isiOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const dev = isiOS ? 'iPhone / iPad' : /Android/.test(ua) ? 'Android' : /Mac/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : 'อื่น ๆ';
+  const br  = /CriOS/.test(ua) ? 'Chrome (iOS)' : /EdgiOS|Edg/.test(ua) ? 'Edge' : /FxiOS|Firefox/.test(ua) ? 'Firefox' : /Chrome/.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : 'อื่น ๆ';
+
+  loadVoices();
+  const thVoices = voices.filter(v => (v.lang||'').toLowerCase().startsWith('th'));
+
+  let html = '<div class="dg-title">🔎 ผลตรวจระบบเสียง</div>';
+  html += diagLine('📱', 'อุปกรณ์: ' + dev + ' • ' + br, '');
+  html += diagLine(synth ? '✅' : '❌', 'ระบบเสียงในเครื่อง (Web Speech)', synth ? 'รองรับ' : 'เบราว์เซอร์นี้ไม่รองรับ');
+  html += diagLine(voices.length ? '✅' : '⚠️', 'เสียงที่พบในเครื่อง: ' + voices.length + ' เสียง',
+                   voices.length ? voices.slice(0,4).map(v => v.lang).join(', ') + (voices.length>4 ? ' …' : '') : 'ยังโหลดไม่ได้ ลองกดตรวจซ้ำอีกครั้ง');
+  html += diagLine(thVoices.length ? '✅' : '❌', 'เสียงภาษาไทยในเครื่อง: ' + thVoices.length,
+                   thVoices.length ? thVoices.map(v => v.name).join(', ') : 'ไม่มี — ต้องใช้เสียงออนไลน์ หรือติดตั้งเสียงไทยเพิ่ม');
+  html += diagLine(navigator.onLine ? '✅' : '❌', 'อินเทอร์เน็ต', navigator.onLine ? 'ออนไลน์อยู่' : 'ออฟไลน์ — เสียงออนไลน์ใช้ไม่ได้');
+  html += `<div class="dg-net" id="dgNet">⏳ กำลังทดสอบโหลดเสียงออนไลน์...</div>`;
+  if(isiOS) html += diagLine('🔔', 'เช็กปุ่มสไลด์ข้างเครื่อง (iPhone)', 'ถ้าเปิดโหมดปิดเสียง (เห็นแถบสีส้ม) เสียงจะไม่ออกเลย ให้สไลด์กลับมาเป็นโหมดมีเสียง แล้วเร่งเสียงขึ้นด้วยนะคะ');
+
+  html += `<div class="dg-btns">
+    <button class="btn btn-light btn-sm" onclick="testOnlineVoice()">🌐 ทดสอบเสียงออนไลน์</button>
+    <button class="btn btn-light btn-sm" onclick="testDeviceVoice()">📱 ทดสอบเสียงในเครื่อง</button>
+    <button class="btn btn-outline btn-sm" onclick="runVoiceDiag()">🔄 ตรวจซ้ำ</button>
+  </div>`;
+  box.innerHTML = html;
+
+  /* ทดสอบว่าดาวน์โหลดไฟล์เสียงออนไลน์ได้จริงไหม */
+  const probe = new Audio(ttsUrl('ทดสอบ', 'th'));
+  let done = false;
+  const finish = (icon, msg) => {
+    if(done) return; done = true;
+    const el = $("dgNet"); if(el) el.innerHTML = icon + ' ' + msg;
+  };
+  probe.oncanplaythrough = () => finish('✅', 'โหลดเสียงออนไลน์สำเร็จ (แหล่ง: ' + TTS_SOURCES[ttsSrcIdx].name + ') — กดปุ่มทดสอบด้านล่างได้เลย');
+  probe.onerror = () => finish('❌', 'โหลดเสียงออนไลน์ไม่สำเร็จ — เครือข่ายอาจบล็อก ลองสลับเป็นเน็ตมือถือ/Wi-Fi อื่น หรือใช้เสียงในเครื่อง');
+  probe.load();
+  setTimeout(() => finish('⚠️', 'ทดสอบไม่เสร็จใน 8 วินาที — เครือข่ายอาจช้าหรือถูกบล็อก'), 8000);
+}
+
+function testOnlineVoice(){
+  localStorage.setItem('voiceMode', 'online');
+  onlineFailed = false;
+  stopSpeak();
+  playOnline('สวัสดีค่ะ หนูชื่อน้องโนราห์ ยินดีต้อนรับสู่เมืองพัทลุงนะคะ', 'th');
+  toast('🌐 กำลังเล่นเสียงออนไลน์...');
+}
+
+function testDeviceVoice(){
+  stopSpeak();
+  const th = voices.filter(v => (v.lang||'').toLowerCase().startsWith('th'));
+  if(!th.length){ toast('❌ เครื่องนี้ไม่มีเสียงไทย — ใช้เสียงออนไลน์แทนนะคะ'); return }
+  speakDevice('สวัสดีค่ะ หนูชื่อน้องโนราห์', 'th-TH');
+  toast('📱 กำลังเล่นเสียงในเครื่อง (' + th[0].name + ')');
 }
 
 /* เสียงในเครื่อง (สำรอง) */
