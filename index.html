@@ -409,6 +409,19 @@ footer{padding:0;text-align:left}
   *,*::after{animation:none!important;transition-duration:.01ms!important}
 }
 
+/* 🌐 ปุ่มเลือกภาษาเสียง */
+.lang-row{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.55rem;padding-top:.55rem;border-top:1px dashed var(--gray-line)}
+.lang-btn{
+  border-radius:999px;padding:.24rem .6rem;font-size:.76rem;font-weight:600;
+  background:var(--gray-bg);color:var(--text-sub);border:1.5px solid transparent;transition:all .15s;
+}
+.lang-btn:hover{border-color:var(--green-light)}
+.lang-btn.active{background:var(--green-dark);color:#fff}
+.lang-btn.novoice{opacity:.45}
+.lang-note{font-size:.7rem;color:var(--text-sub);margin-top:.35rem;line-height:1.4}
+.lang-select{padding:.5rem .9rem;border:1.5px solid var(--gray-line);border-radius:999px;background:#fff;font-size:.85rem;font-weight:600;outline:none;cursor:pointer;font-family:inherit}
+.lang-select:focus{border-color:var(--green-light)}
+
 /* ============ ⚙️ ทั่วไป / Responsive ============ */
 .view{display:none;animation:fadeIn .3s ease}
 .view.active{display:block}
@@ -549,6 +562,7 @@ footer{padding:0;text-align:left}
       <!-- 🔊 อ่านออกเสียงรายละเอียดสถานที่ -->
       <div class="speak-bar">
         <button class="btn btn-light" id="btnSpeakDetail" onclick="mascotReadPlace()">🔊 ให้น้องโนราห์อ่านให้ฟัง</button>
+        <select class="lang-select" id="langSelect" onchange="setLang(this.value, true)" title="เลือกภาษาเสียง"></select>
         <button class="btn btn-outline" onclick="stopSpeak()">⏹ หยุดอ่าน</button>
       </div>
     </div>
@@ -923,6 +937,9 @@ footer{padding:0;text-align:left}
       <button onclick="stopSpeak()">⏹ หยุด</button>
       <button onclick="mascotTip()">💡 เกร็ดน่ารู้</button>
     </div>
+    <!-- 🌐 เลือกภาษาที่ให้น้องโนราห์อ่าน -->
+    <div class="lang-row" id="langRow"></div>
+    <div class="lang-note" id="langNote"></div>
   </div>
 </div>
 <button class="mascot-call" id="mascotCall" title="เรียกน้องโนราห์" onclick="showMascot(true)">👘</button>
@@ -1416,37 +1433,213 @@ function renderReviews(p){
 }
 
 /* ============================================================
-   👘🔊 น้องโนราห์ — ผู้ช่วยนำเที่ยว + ระบบอ่านออกเสียงภาษาไทย
-   ใช้ Web Speech API (SpeechSynthesis) ที่มีในเบราว์เซอร์ ไม่ต้องติดตั้งอะไรเพิ่ม
+   🌐 ระบบหลายภาษา (Multi-language Voice)
+   รองรับ 6 ภาษา — ผู้ใช้กดเลือกได้เอง เสียงมาจาก Web Speech API ในเครื่อง
+   ============================================================ */
+const LANGS = [
+  { code:'th-TH', key:'th', flag:'🇹🇭', label:'ไทย' },
+  { code:'en-US', key:'en', flag:'🇬🇧', label:'English' },
+  { code:'zh-CN', key:'zh', flag:'🇨🇳', label:'中文' },
+  { code:'ja-JP', key:'ja', flag:'🇯🇵', label:'日本語' },
+  { code:'ko-KR', key:'ko', flag:'🇰🇷', label:'한국어' },
+  { code:'fr-FR', key:'fr', flag:'🇫🇷', label:'Français' },
+];
+let curLang = localStorage.getItem('voiceLang') || 'th';
+const L = () => LANGS.find(l => l.key === curLang) || LANGS[0];
+
+/* ชื่ออำเภอในภาษาอังกฤษ (ใช้กับทุกภาษาที่ไม่ใช่ไทย) */
+const DISTRICT_EN = {
+  'อ.เมืองพัทลุง':'Mueang Phatthalung', 'อ.ควนขนุน':'Khuan Khanun', 'อ.เขาชัยสน':'Khao Chaison',
+  'อ.กงหรา':'Kong Ra', 'อ.ป่าพะยอม':'Pa Phayom', 'อ.ศรีบรรพต':'Si Banphot',
+  'อ.ปากพะยูน':'Pak Phayun', 'อ.ศรีนครินทร์':'Si Nakharin', 'อ.ตะโหมด':'Tamot',
+  'อ.บางแก้ว':'Bang Kaeo', 'อ.ป่าบอน':'Pa Bon',
+};
+
+/* ชื่อ + คำบรรยายสถานที่ในภาษาต่าง ๆ (18 แห่งหลัก) */
+const PLACE_I18N = {
+  p1:{ en:{n:'Thale Noi',d:'Thale Noi is Thailand\'s first Ramsar wetland site, home to water buffaloes and over a hundred bird species. The red lotus fields bloom beautifully in the early morning.'}, zh:{n:'小海湖'}, ja:{n:'タレーノーイ湖'}, ko:{n:'탈레노이 호수'} },
+  p2:{ en:{n:'80th Anniversary Bridge',d:'The longest bridge in Thailand, crossing over Thale Noi lake. A famous spot for sunrise photography and watching water buffaloes graze among the lotus fields.'}, zh:{n:'八十周年纪念大桥'}, ja:{n:'80周年記念橋'}, ko:{n:'80주년 기념 다리'} },
+  p3:{ en:{n:'Khao Ok Thalu',d:'The iconic mountain symbol of Phatthalung, about 250 metres high, famous for the natural hole through its peak. Climb the stairs for a 360 degree view of the town.'}, zh:{n:'穿心山'}, ja:{n:'カオ・オークタルー山'}, ko:{n:'카오옥탈루 산'} },
+  p4:{ en:{n:'Wat Khian Bang Kaeo',d:'One of the oldest temples in southern Thailand, home to the sacred Phra That Bang Kaeo pagoda dating back to the Srivijaya period.'}, zh:{n:'邦盖寺'}, ja:{n:'ワット・キアンバンケオ'}, ko:{n:'왓 키안방깨오'} },
+  p5:{ en:{n:'Lampam Beach',d:'A peaceful lakeside beach on Songkhla Lake, shaded by pine trees with pavilions and excellent seafood restaurants. Perfect for a family picnic in the evening.'}, zh:{n:'兰帕海滩'}, ja:{n:'ラムパムビーチ'}, ko:{n:'람팜 해변'} },
+  p6:{ en:{n:'Phatthalung Governor\'s Palace',d:'A traditional Thai wooden house over one hundred years old, the former residence of the governor of Phatthalung. A classic spot for vintage style photos.'}, zh:{n:'博他仑府尹古宅'}, ja:{n:'パッタルン旧領主邸'}, ko:{n:'팟탈룽 옛 관저'} },
+  p7:{ en:{n:'Phraiwan Waterfall',d:'The largest waterfall in Phatthalung, surrounded by the lush forest of the Banthat mountain range. Clear and cool water all year round with several levels to swim in.'}, zh:{n:'派湾瀑布'}, ja:{n:'プライワン滝'}, ko:{n:'프라이완 폭포'} },
+  p8:{ en:{n:'Khao Chaison Hot Spring',d:'A natural hot spring of about 45 degrees Celsius, great for a relaxing foot soak. Nearby you can also visit Lokoh Cave and the Cold Water Cave.'}, zh:{n:'考差颂温泉'}, ja:{n:'カオチャイソン温泉'}, ko:{n:'카오차이손 온천'} },
+  p9:{ en:{n:'Nan Mod Daeng Rafting',d:'Gentle river rafting on cool clear water flowing down from the Banthat mountains. Safe and fun for the whole family, with restaurants along the way.'}, zh:{n:'南莫丹漂流'}, ja:{n:'ナーンモッデーン川下り'}, ko:{n:'난못댕 래프팅'} },
+  p10:{ en:{n:'Tai Node Market',d:'A charming community weekend market under the sugar palm trees, offering local food, handicrafts and live music in a warm southern Thai atmosphere.'}, zh:{n:'棕榈树下市集'}, ja:{n:'タイノート市場'}, ko:{n:'따이놋 시장'} },
+  p11:{ en:{n:'Wat Khuha Sawan',d:'A royal temple beside a limestone cave enshrining ancient Buddha images. Cool inside, with a viewpoint over the town from above.'}, zh:{n:'库哈沙湾寺'}, ja:{n:'ワット・クハサワン'}, ko:{n:'왓 쿠하사완'} },
+  p12:{ en:{n:'Khao Pu Khao Ya National Park',d:'A rainforest park in the Banthat mountain range with waterfalls, nature trails and camping grounds surrounded by mountains.'}, zh:{n:'考普考亚国家公园'}, ja:{n:'カオプー・カオヤー国立公園'}, ko:{n:'카오뿌 카오야 국립공원'} },
+  p13:{ en:{n:'Laem Chong Thanon',d:'A cape reaching into Songkhla Lake where you can see traditional giant fishing nets, beautiful sunrises and a long wooden walkway.'}, zh:{n:'钟他农海角'}, ja:{n:'レーム・チョンタノン岬'}, ko:{n:'램 총타논 곶'} },
+  p14:{ en:{n:'Pak Pra Viewpoint',d:'World famous spot for photographing the giant fishing nets at sunrise, with morning mist drifting over the lake. A must visit for photographers.'}, zh:{n:'帕帕观景点'}, ja:{n:'パークプラー展望地'}, ko:{n:'빡쁘라 전망대'} },
+  p15:{ en:{n:'Koh Si Koh Ha Islands',d:'A group of islands in Songkhla Lake, known for swiftlet nests, limestone cliffs and the traditional lake fishing way of life.'}, zh:{n:'四五岛'}, ja:{n:'コーシー・コーハー諸島'}, ko:{n:'꼬씨 꼬하 제도'} },
+  p16:{ en:{n:'Na Po Kae',d:'A landmark in the middle of the rice fields with a cafe and an agricultural learning centre. Walk the bamboo bridge across the green paddy fields.'}, zh:{n:'那波盖稻田'}, ja:{n:'ナーポーゲー田園'}, ko:{n:'나뽀깨 논밭'} },
+  p17:{ en:{n:'Malai Thep Nimit Cave',d:'A large limestone cave enshrining Buddha images among beautiful stalactites and stalagmites, with a viewpoint over Phatthalung town above.'}, zh:{n:'马莱天赐洞'}, ja:{n:'マーライテープニミット洞窟'}, ko:{n:'말라이텝니밋 동굴'} },
+  p18:{ en:{n:'Phu Khao Yoi Land',d:'A panoramic viewpoint over the sea of mist and rice fields, with a small cafe to enjoy coffee in the cool morning breeze.'}, zh:{n:'普考约观景台'}, ja:{n:'プーカオヨイ展望台'}, ko:{n:'푸카오요이 전망대'} },
+};
+
+/* แปลคำไทยที่พบบ่อยในช่องเวลา/ราคา (ใช้ได้กับข้อมูลที่แอดมินเพิ่มเองด้วย) */
+const SNIPPET = {
+  en:[['เปิดตลอดวัน','open all day'],['เสาร์-อาทิตย์','Saturday and Sunday'],['หยุดจันทร์-อังคาร','closed Monday and Tuesday'],['แนะนำ','recommended'],['ล่องเรือเริ่ม','boat trip from'],['เหมาเรือเริ่ม','boat charter from'],['เริ่มต้น','from'],['มีค่ากิจกรรม','activity fees apply'],['ไม่ระบุ','not specified'],['ฟรี','free'],['บาท','baht'],['ต่อคืน','per night'],['คืน','night'],['น.','']],
+  fr:[['เปิดตลอดวัน','ouvert toute la journée'],['เสาร์-อาทิตย์','samedi et dimanche'],['หยุดจันทร์-อังคาร','fermé lundi et mardi'],['แนะนำ','recommandé'],['ล่องเรือเริ่ม','bateau à partir de'],['เหมาเรือเริ่ม','bateau privé à partir de'],['เริ่มต้น','à partir de'],['มีค่ากิจกรรม','frais d\'activités'],['ไม่ระบุ','non précisé'],['ฟรี','gratuit'],['บาท','bahts'],['ต่อคืน','par nuit'],['คืน','nuit'],['น.','']],
+  zh:[['เปิดตลอดวัน','全天开放'],['เสาร์-อาทิตย์','周六和周日'],['หยุดจันทร์-อังคาร','周一和周二休息'],['แนะนำ','推荐'],['ล่องเรือเริ่ม','游船起价'],['เหมาเรือเริ่ม','包船起价'],['เริ่มต้น','起'],['มีค่ากิจกรรม','活动另收费'],['ไม่ระบุ','未注明'],['ฟรี','免费'],['บาท','泰铢'],['ต่อคืน','每晚'],['คืน','晚'],['น.','']],
+  ja:[['เปิดตลอดวัน','終日開放'],['เสาร์-อาทิตย์','土曜と日曜'],['หยุดจันทร์-อังคาร','月曜と火曜は休み'],['แนะนำ','おすすめ'],['ล่องเรือเริ่ม','ボートは'],['เหมาเรือเริ่ม','貸切ボートは'],['เริ่มต้น','から'],['มีค่ากิจกรรม','アクティビティ料金別途'],['ไม่ระบุ','記載なし'],['ฟรี','無料'],['บาท','バーツ'],['ต่อคืน','一泊'],['คืน','泊'],['น.','']],
+  ko:[['เปิดตลอดวัน','종일 개방'],['เสาร์-อาทิตย์','토요일과 일요일'],['หยุดจันทร์-อังคาร','월요일과 화요일 휴무'],['แนะนำ','추천'],['ล่องเรือเริ่ม','보트 투어'],['เหมาเรือเริ่ม','보트 대절'],['เริ่มต้น','부터'],['มีค่ากิจกรรม','체험 비용 별도'],['ไม่ระบุ','미기재'],['ฟรี','무료'],['บาท','바트'],['ต่อคืน','1박'],['คืน','박'],['น.','']],
+};
+
+function trSnippet(str, key){
+  if(!str) return '';
+  if(key === 'th') return str;
+  let out = String(str);
+  (SNIPPET[key] || SNIPPET.en).forEach(([th, tr]) => { out = out.split(th).join(tr) });
+  return out.replace(/\s+/g,' ').trim();
+}
+
+/* ดึงข้อมูลสถานที่ในภาษาที่เลือก */
+function localizedPlace(p, key){
+  const t = PLACE_I18N[p.id] || {};
+  const name = key === 'th' ? p.name
+             : (t[key] && t[key].n) || (t.en && t.en.n) || p.name;
+  const desc = key === 'th' ? (p.description || '')
+             : key === 'en' ? ((t.en && t.en.d) || '') : '';
+  return {
+    name,
+    desc,
+    district: key === 'th' ? (p.district || '') : (DISTRICT_EN[p.district] || ''),
+    hours: trSnippet(p.openHours, key),
+    fee:   trSnippet(p.fee, key),
+  };
+}
+
+/* สร้างบทอ่านตามภาษา */
+function buildPlaceScript(p, key = curLang){
+  const x = localizedPlace(p, key);
+  const r = effectiveRating(p).toFixed(1);
+  const loc = x.district ? x.district : '';
+  switch(key){
+    case 'en': return `${x.name}, located in ${loc || 'Phatthalung'}, Phatthalung Province, Thailand. ${x.desc} Opening hours: ${x.hours || 'not specified'}. Entrance fee: ${x.fee || 'not specified'}. Rated ${r} out of 5 stars.`;
+    case 'fr': return `${x.name}, situé à ${loc || 'Phatthalung'}, dans la province de Phatthalung, en Thaïlande. ${x.desc} Horaires d'ouverture : ${x.hours || 'non précisé'}. Prix d'entrée : ${x.fee || 'non précisé'}. Note : ${r} sur 5.`;
+    case 'zh': return `${x.name}，位于泰国博他仑府${loc ? '，' + loc + '县' : ''}。开放时间：${x.hours || '未注明'}。门票：${x.fee || '未注明'}。评分：五分中的${r}分。`;
+    case 'ja': return `${x.name}は、タイのパッタルン県${loc ? '、' + loc + '郡' : ''}にあります。営業時間は${x.hours || '記載なし'}。入場料は${x.fee || '記載なし'}。評価は五点満点中${r}点です。`;
+    case 'ko': return `${x.name}, 태국 팟탈룽주${loc ? ' ' + loc + '군' : ''}에 있습니다. 운영 시간은 ${x.hours || '미기재'}. 입장료는 ${x.fee || '미기재'}. 평점은 5점 만점에 ${r}점입니다.`;
+    default: {
+      const rs = placeReviews(p.id).length;
+      return `${p.name} ตั้งอยู่ที่ ${p.district || 'จังหวัดพัทลุง'} จังหวัดพัทลุงค่ะ. ${p.description || ''} `
+           + `เปิดให้เข้าชม ${p.openHours || 'ไม่ระบุ'} ค่าเข้าชม ${p.fee || 'ไม่ระบุ'} `
+           + `คะแนนความนิยม ${r} จาก 5 ดาว` + (rs ? ` จาก ${rs} รีวิวค่ะ` : 'ค่ะ');
+    }
+  }
+}
+
+/* ข้อความทักทาย / เกร็ดน่ารู้ แยกตามภาษา */
+const HELLO_I18N = {
+  th:['สวัสดีค่ะ! หนูชื่อน้องโนราห์ ยินดีต้อนรับสู่เมืองพัทลุงนะคะ',
+      'ชื่อหนูมาจากศิลปะการแสดงโนราห์ ศิลปะประจำถิ่นปักษ์ใต้ของเราค่ะ',
+      'อยากไปเที่ยวไหนดีคะ? ลองกดที่รูปสถานที่ดูสิคะ หนูจะเล่าให้ฟังเอง',
+      'อย่าลืมกดเช็คอินเก็บประวัติการเดินทางด้วยนะคะ สนุกมากเลย'],
+  en:['Hello! My name is Nora, your travel guide to Phatthalung.',
+      'My name comes from Nora, the traditional dance art of southern Thailand.',
+      'Where would you like to go today? Tap any place to hear about it.',
+      'Don\'t forget to check in and collect your travel history!'],
+  zh:['你好！我叫诺拉，是你的博他仑导游。','我的名字来自泰南传统舞蹈艺术诺拉。','今天想去哪里呢？点一个景点，我来为你介绍。','别忘了打卡记录你的旅程哦！'],
+  ja:['こんにちは！私はノーラー、パッタルンのガイドです。','私の名前は南タイの伝統舞踊ノーラーから来ています。','今日はどこへ行きたいですか？場所をタップしてください。','チェックインして旅の記録を残してくださいね！'],
+  ko:['안녕하세요! 저는 팟탈룽 여행 가이드 노라입니다.','제 이름은 태국 남부 전통 무용 노라에서 왔어요.','오늘 어디에 가고 싶으세요? 장소를 눌러보세요.','체크인해서 여행 기록을 남겨보세요!'],
+  fr:['Bonjour ! Je m\'appelle Nora, votre guide à Phatthalung.','Mon nom vient de Nora, la danse traditionnelle du sud de la Thaïlande.','Où voulez-vous aller aujourd\'hui ? Touchez un lieu pour en savoir plus.','N\'oubliez pas de vous enregistrer pour garder vos souvenirs !'],
+};
+const TIPS_I18N = {
+  th:['เกร็ดน่ารู้ค่ะ ทะเลน้อยเป็นพื้นที่ชุ่มน้ำโลกแห่งแรกของประเทศไทย ช่วงบัวแดงบานสวยที่สุดคือเดือนกุมภาพันธ์ถึงเมษายนค่ะ',
+      'ถ้าอยากถ่ายรูปยอยักษ์ที่ปากประ ต้องไปตั้งแต่ตีห้าครึ่งนะคะ แสงเช้าสวยมากเลย',
+      'มาพัทลุงต้องลองข้าวยำกับแกงไตปลานะคะ เป็นอาหารใต้ตำรับดั้งเดิมเลย',
+      'ช่วงเที่ยวธรรมชาติที่ดีที่สุดคือเดือนมกราคมถึงเมษายนค่ะ หน้าฝนคือตุลาคมถึงธันวาคมนะคะ'],
+  en:['Fun fact: Thale Noi is Thailand\'s first Ramsar wetland site. The red lotus blooms best from February to April.',
+      'For the famous giant fishing net photos at Pak Pra, arrive by five thirty in the morning for the best light.',
+      'You must try Khao Yam rice salad and Gaeng Tai Pla curry, classic southern Thai dishes.',
+      'The best months for nature trips are January to April. The rainy season runs from October to December.'],
+  zh:['小知识：小海湖是泰国第一个国际重要湿地，红莲盛开的最佳时间是二月到四月。','想在帕帕拍摄巨型渔网，请在早上五点半前到达，晨光最美。','来博他仑一定要尝尝拌饭沙拉和鱼内脏咖喱，都是正宗泰南美食。','一月到四月最适合亲近自然，十月到十二月是雨季。'],
+  ja:['豆知識です。タレーノーイはタイ初のラムサール条約登録湿地で、赤い蓮は二月から四月が見頃です。','パークプラーの巨大な漁網を撮るなら、朝五時半までに到着するのがおすすめです。','パッタルンではカオヤムとゲーンタイプラーをぜひ味わってください。','自然観光のベストシーズンは一月から四月、雨季は十月から十二月です。'],
+  ko:['알아두면 좋은 정보! 탈레노이는 태국 최초의 람사르 습지이며 붉은 연꽃은 2월에서 4월이 절정입니다.','빡쁘라의 거대한 어망 사진을 찍으려면 새벽 다섯 시 반까지 도착하세요.','팟탈룽에서는 카오얌과 깽따이쁠라를 꼭 드셔보세요.','자연 여행은 1월에서 4월이 가장 좋고, 우기는 10월에서 12월입니다.'],
+  fr:['Le saviez-vous ? Thale Noi est le premier site Ramsar de Thaïlande. Les lotus rouges fleurissent de février à avril.','Pour photographier les grands filets de pêche à Pak Pra, arrivez avant cinq heures et demie du matin.','À Phatthalung, goûtez absolument le Khao Yam et le curry Gaeng Tai Pla.','La meilleure période pour la nature va de janvier à avril. La saison des pluies dure d\'octobre à décembre.'],
+};
+const UI_I18N = {
+  th:{read:'🔊 ให้น้องโนราห์อ่านให้ฟัง', reading:'🔊 กำลังอ่าน...', pick:'เลือกสถานที่ก่อนนะคะ แล้วหนูจะอ่านให้ฟังค่ะ', novoice:'⚠️ เครื่องนี้ยังไม่มีเสียงภาษานี้ ระบบจะใช้เสียงที่ใกล้เคียงที่สุดแทน', switched:'เปลี่ยนเป็นภาษาไทยแล้วค่ะ'},
+  en:{read:'🔊 Let Nora read it', reading:'🔊 Reading...', pick:'Please choose a place first and I will read it for you.', novoice:'⚠️ No voice for this language is installed on your device. A similar voice will be used.', switched:'Switched to English. I will read in English from now on.'},
+  zh:{read:'🔊 让诺拉朗读', reading:'🔊 朗读中...', pick:'请先选择一个景点，我来为你朗读。', novoice:'⚠️ 此设备尚未安装该语言的语音，将使用相近的语音。', switched:'已切换为中文，接下来我会用中文朗读。'},
+  ja:{read:'🔊 ノーラーが読みます', reading:'🔊 読み上げ中...', pick:'まず場所を選んでください。読み上げますね。', novoice:'⚠️ この端末にはこの言語の音声がありません。近い音声を使います。', switched:'日本語に切り替えました。これから日本語で読み上げます。'},
+  ko:{read:'🔊 노라가 읽어줄게요', reading:'🔊 읽는 중...', pick:'먼저 장소를 선택해 주세요. 제가 읽어드릴게요.', novoice:'⚠️ 이 기기에는 해당 언어 음성이 없습니다. 비슷한 음성을 사용합니다.', switched:'한국어로 전환했습니다. 이제 한국어로 읽어드릴게요.'},
+  fr:{read:'🔊 Nora peut le lire', reading:'🔊 Lecture...', pick:'Choisissez d\'abord un lieu et je vous le lirai.', novoice:'⚠️ Aucune voix pour cette langue sur cet appareil. Une voix proche sera utilisée.', switched:'Passé en français. Je lirai en français désormais.'},
+};
+const T = (k) => (UI_I18N[curLang] || UI_I18N.th)[k];
+
+/* ============================================================
+   👘🔊 น้องโนราห์ — ผู้ช่วยนำเที่ยว + ระบบอ่านออกเสียง
+   ใช้ Web Speech API (SpeechSynthesis) ในเบราว์เซอร์ ไม่ต้องติดตั้งอะไรเพิ่ม
    ============================================================ */
 const synth = window.speechSynthesis;
-let thaiVoice = null;
+let voices = [];
 
-/* ค้นหาเสียงภาษาไทยในเครื่องผู้ใช้ (บางเบราว์เซอร์โหลดรายการเสียงช้า) */
-function pickThaiVoice(){
+function loadVoices(){
   if(!synth) return;
-  const vs = synth.getVoices();
-  thaiVoice = vs.find(v => v.lang === 'th-TH')
-           || vs.find(v => (v.lang||'').toLowerCase().startsWith('th'))
-           || null;
+  voices = synth.getVoices() || [];
+  renderLangUI();
 }
-if(synth){
-  pickThaiVoice();
-  synth.onvoiceschanged = pickThaiVoice;
+if(synth){ loadVoices(); synth.onvoiceschanged = loadVoices; }
+
+/* หาเสียงที่ตรงกับภาษาที่เลือกที่สุด */
+function voiceFor(code){
+  if(!voices.length) return null;
+  const base = code.split('-')[0].toLowerCase();
+  return voices.find(v => v.lang.replace('_','-').toLowerCase() === code.toLowerCase())
+      || voices.find(v => (v.lang||'').replace('_','-').toLowerCase().startsWith(base))
+      || null;
+}
+const hasVoice = (code) => !!voiceFor(code);
+
+/* วาดปุ่มเลือกภาษา (ทั้งในกล่องคำพูดและ dropdown หน้ารายละเอียด) */
+function renderLangUI(){
+  const row = $("langRow");
+  if(row){
+    row.innerHTML = LANGS.map(l => `
+      <button class="lang-btn${l.key === curLang ? ' active' : ''}${hasVoice(l.code) ? '' : ' novoice'}"
+              title="${hasVoice(l.code) ? l.label : l.label + ' (ไม่มีเสียงในเครื่องนี้)'}"
+              onclick="setLang('${l.key}', true)">${l.flag} ${l.label}</button>`).join('');
+  }
+  const sel = $("langSelect");
+  if(sel){
+    sel.innerHTML = LANGS.map(l =>
+      `<option value="${l.key}"${l.key === curLang ? ' selected' : ''}>${l.flag} ${l.label}${hasVoice(l.code) ? '' : ' ⚠️'}</option>`).join('');
+  }
+  const note = $("langNote");
+  if(note) note.textContent = hasVoice(L().code) ? '' : T('novoice');
+  const b = $("btnSpeakDetail");
+  if(b) b.textContent = T('read');
+}
+
+/* เปลี่ยนภาษา */
+function setLang(key, announce){
+  curLang = key;
+  localStorage.setItem('voiceLang', key);
+  stopSpeak();
+  renderLangUI();
+  if(announce){
+    doHappy();
+    mascotSay(T('switched'), true);
+    /* ถ้ากำลังเปิดหน้าสถานที่อยู่ ให้แสดงข้อความแนะนำในภาษาใหม่ต่อ */
+  }
 }
 
 /* พูดข้อความ + ให้น้องโนราห์ขยับปากและโบกมือไปด้วย */
-function speak(text, onEnd){
+function speak(text, langCode){
   if(!text) return;
   if(!synth){ toast('⚠️ เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง'); return }
+  const code = langCode || L().code;
   synth.cancel();                       /* หยุดข้อความเดิมก่อนเสมอ */
   const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'th-TH';
-  if(thaiVoice) utt.voice = thaiVoice;
-  utt.rate = 0.96;                      /* ช้าลงนิดให้ฟังชัด */
+  utt.lang = code;
+  const v = voiceFor(code);
+  if(v) utt.voice = v;
+  utt.rate  = 0.96;                     /* ช้าลงนิดให้ฟังชัด */
   utt.pitch = 1.15;                     /* เสียงสูงนิด ๆ ให้น่ารัก */
   utt.onstart = () => setTalking(true);
-  utt.onend   = () => { setTalking(false); onEnd && onEnd(); };
+  utt.onend   = () => setTalking(false);
   utt.onerror = () => setTalking(false);
   synth.speak(utt);
 }
@@ -1462,7 +1655,7 @@ function setTalking(on){
   const st = $("mascotStatus");
   if(st) st.innerHTML = on ? '<span class="speaking-wave"><i></i><i></i><i></i></span>' : '';
   const b = $("btnSpeakDetail");
-  if(b) b.textContent = on ? '🔊 กำลังอ่าน...' : '🔊 ให้น้องโนราห์อ่านให้ฟัง';
+  if(b) b.textContent = on ? T('reading') : T('read');
 }
 
 /* แสดง / ซ่อนน้องโนราห์ */
@@ -1471,7 +1664,8 @@ function showMascot(withGreeting){
   $("mascotCall").classList.remove('show');
   localStorage.setItem('mascotHidden', '0');
   if(withGreeting){
-    mascotSay('ยินดีที่ได้เจอกันอีกนะคะ! ให้หนูช่วยแนะนำที่เที่ยวไหมคะ 💚', true);
+    const arr = HELLO_I18N[curLang] || HELLO_I18N.th;
+    mascotSay(arr[0], true);
     doWave();
   }
 }
@@ -1503,50 +1697,25 @@ function doHappy(){
 }
 
 /* คลิกที่ตัวน้องโนราห์ → ทักทาย + กระโดดน่ารัก ๆ */
-const MASCOT_HELLO = [
-  'สวัสดีค่ะ! หนูชื่อน้องโนราห์ ยินดีต้อนรับสู่เมืองพัทลุงนะคะ',
-  'ชื่อหนูมาจากศิลปะการแสดงโนราห์ ศิลปะประจำถิ่นปักษ์ใต้ของเราค่ะ',
-  'อยากไปเที่ยวไหนดีคะ? ลองกดที่รูปสถานที่ดูสิคะ หนูจะเล่าให้ฟังเอง',
-  'พัทลุงมีทั้งทะเลน้อย ภูเขา น้ำตก และคาเฟ่สวย ๆ เยอะเลยค่ะ',
-  'อย่าลืมกดเช็คอินเก็บประวัติการเดินทางด้วยนะคะ สนุกมากเลย',
-];
 function mascotTap(){
   doHappy();
-  const msg = MASCOT_HELLO[Math.floor(Math.random() * MASCOT_HELLO.length)];
-  mascotSay(msg, true);
+  const arr = HELLO_I18N[curLang] || HELLO_I18N.th;
+  mascotSay(arr[Math.floor(Math.random() * arr.length)], true);
 }
 
-/* 💡 เกร็ดน่ารู้แบบสุ่ม */
-const TIPS = [
-  'เกร็ดน่ารู้ค่ะ ทะเลน้อยเป็นพื้นที่ชุ่มน้ำโลกแห่งแรกของประเทศไทย ช่วงบัวแดงบานสวยที่สุดคือเดือนกุมภาพันธ์ถึงเมษายนค่ะ',
-  'ถ้าอยากถ่ายรูปยอยักษ์ที่ปากประ ต้องไปตั้งแต่ตีห้าครึ่งนะคะ แสงเช้าสวยมากเลย',
-  'เขาอกทะลุเป็นสัญลักษณ์ประจำจังหวัดพัทลุง มีช่องทะลุกลางเขาเป็นเอกลักษณ์ค่ะ',
-  'มาพัทลุงต้องลองข้าวยำกับแกงไตปลานะคะ เป็นอาหารใต้ตำรับดั้งเดิมเลย',
-  'ล่องแก่งหนานมดแดงเหมาะกับครอบครัวมากค่ะ น้ำใสเย็นไหลมาจากเทือกเขาบรรทัด',
-  'หน้าฝนของพัทลุงคือเดือนตุลาคมถึงธันวาคมค่ะ ถ้าจะเที่ยวธรรมชาติแนะนำเดือนมกราคมถึงเมษายนนะคะ',
-];
+/* 💡 เกร็ดน่ารู้แบบสุ่ม (ตามภาษาที่เลือก) */
 function mascotTip(){
   doHappy();
-  mascotSay(TIPS[Math.floor(Math.random() * TIPS.length)], true);
+  const arr = TIPS_I18N[curLang] || TIPS_I18N.th;
+  mascotSay(arr[Math.floor(Math.random() * arr.length)], true);
 }
 
-/* 📖 อ่านรายละเอียดสถานที่ที่กำลังเปิดอยู่ */
-function buildPlaceScript(p){
-  const rs = placeReviews(p.id).length;
-  return `${p.name} ตั้งอยู่ที่ ${p.district || 'จังหวัดพัทลุง'} จังหวัดพัทลุงค่ะ. `
-       + `${p.description || ''} `
-       + `เปิดให้เข้าชม ${p.openHours || 'ไม่ระบุ'} `
-       + `ค่าเข้าชม ${p.fee || 'ไม่ระบุ'} `
-       + `คะแนนความนิยม ${effectiveRating(p).toFixed(1)} จาก 5 ดาว`
-       + (rs ? ` จาก ${rs} รีวิวค่ะ` : 'ค่ะ');
-}
-
+/* 📖 อ่านรายละเอียดสถานที่ที่กำลังเปิดอยู่ ในภาษาที่เลือก */
 function mascotReadPlace(){
   const p = state.currentPlace;
-  if(!p){ mascotSay('ลองเลือกสถานที่ที่สนใจก่อนนะคะ แล้วหนูจะอ่านรายละเอียดให้ฟังค่ะ', true); return }
+  if(!p){ mascotSay(T('pick'), true); return }
   localStorage.setItem('autoRead', '1');   /* ครั้งต่อไปอ่านให้อัตโนมัติ */
-  const script = buildPlaceScript(p);
-  mascotSay(script, true);
+  mascotSay(buildPlaceScript(p), true);
   doWave();
 }
 
@@ -1749,8 +1918,18 @@ function openDetail(id){
   /* 👘 น้องโนราห์โผล่มาแนะนำสถานที่นี้ (ยังไม่อ่านออกเสียงจนกว่าจะกดปุ่ม
      เพราะเบราว์เซอร์ส่วนใหญ่ห้ามเล่นเสียงเองก่อนผู้ใช้โต้ตอบ) */
   stopSpeak();
+  renderLangUI();
   if(localStorage.getItem('mascotHidden') !== '1'){
-    mascotSay(`มาถึง ${p.name} แล้วค่ะ! ${(p.description||'').slice(0, 70)}... กดปุ่ม 🔊 ให้หนูอ่านรายละเอียดให้ฟังได้เลยนะคะ`);
+    const x = localizedPlace(p, curLang);
+    const intro = {
+      th:`มาถึง ${x.name} แล้วค่ะ! กดปุ่ม 🔊 ให้หนูอ่านรายละเอียดให้ฟังได้เลยนะคะ`,
+      en:`Welcome to ${x.name}! Tap the 🔊 button and I will read the details for you.`,
+      zh:`欢迎来到${x.name}！点击 🔊 按钮，我来为你朗读详细介绍。`,
+      ja:`${x.name}へようこそ！🔊 ボタンを押すと詳細を読み上げます。`,
+      ko:`${x.name}에 오신 것을 환영합니다! 🔊 버튼을 누르면 자세히 읽어드릴게요.`,
+      fr:`Bienvenue à ${x.name} ! Touchez le bouton 🔊 et je vous lirai les détails.`,
+    }[curLang] || '';
+    mascotSay(intro);
     doWave();
     /* ถ้าผู้ใช้เคยกดฟังมาก่อน ให้อ่านต่อเนื่องอัตโนมัติได้เลย */
     if(localStorage.getItem('autoRead') === '1') setTimeout(() => mascotReadPlace(), 500);
@@ -2149,6 +2328,7 @@ renderUserBox();
 onKindChange();
 buildStarsInput();
 spawnFloaties();                      /* 🍃 ใบไม้/ผีเสื้อลอยใน Hero */
+renderLangUI();                       /* 🌐 วาดปุ่มเลือกภาษา */
 $("searchInput").addEventListener("input", renderPlaces);
 
 /* 👘 น้องโนราห์ทักทายตอนเข้าเว็บ (ถ้าไม่ได้ถูกซ่อนไว้) */
@@ -2158,8 +2338,11 @@ setTimeout(() => {
   } else {
     $("mascot").classList.remove('hide');
     const u = currentUser();
-    mascotSay(u ? `สวัสดีค่ะคุณ ${u.username}! วันนี้อยากไปเที่ยวไหนดีคะ 💚`
-                : 'สวัสดีค่ะ! หนูชื่อน้องโนราห์ ผู้ช่วยนำเที่ยวเมืองพัทลุง กดที่รูปสถานที่เพื่อดูรายละเอียด แล้วหนูจะอ่านให้ฟังนะคะ 💚');
+    const arr = HELLO_I18N[curLang] || HELLO_I18N.th;
+    const hi = (u && curLang === 'th') ? `สวัสดีค่ะคุณ ${u.username}! วันนี้อยากไปเที่ยวไหนดีคะ 💚`
+             : (u && curLang === 'en') ? `Hello ${u.username}! Where would you like to go today?`
+             : arr[0];
+    mascotSay(hi);
     doWave();
   }
 }, 1200);
