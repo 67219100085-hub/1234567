@@ -740,8 +740,8 @@ footer{padding:0;text-align:left}
       <!-- ช่องทางติดต่อ -->
       <div>
         <div class="contact-card"><div class="c-ic">📍</div><div><div class="c-t">ที่อยู่</div><div class="c-s">สำนักงานการท่องเที่ยวจังหวัดพัทลุง<br>ถ.ราเมศวร์ ต.คูหาสวรรค์ อ.เมือง จ.พัทลุง 93000</div></div></div>
-        <div class="contact-card"><div class="c-ic">📞</div><div><div class="c-t">โทรศัพท์</div><div class="c-s">074-611-201 (จ.-ศ. 08.30 - 16.30 น.)</div></div></div>
-        <div class="contact-card"><div class="c-ic">✉️</div><div><div class="c-t">อีเมล</div><div class="c-s">contact@teawphatthalung.com</div></div></div>
+        <div class="contact-card"><div class="c-ic">📞</div><div><div class="c-t">โทรศัพท์</div><div class="c-s">095-361-0489</div></div></div>
+        <div class="contact-card"><div class="c-ic">✉️</div><div><div class="c-t">อีเมล</div><div class="c-s">67219100085@ptl.ac.th<br>67219100071@ptl.ac.th</div></div></div>
         <div class="contact-card"><div class="c-ic">💬</div><div><div class="c-t">โซเชียลมีเดีย</div><div class="c-s">Facebook / TikTok / Instagram: @teawphatthalung</div></div></div>
       </div>
 
@@ -979,8 +979,9 @@ footer{padding:0;text-align:left}
     <div>
       <h5>ติดต่อ</h5>
       <span class="f-link">📍 อ.เมือง จ.พัทลุง 93000</span>
-      <span class="f-link">📞 074-611-201</span>
-      <span class="f-link">✉️ contact@teawphatthalung.com</span>
+      <span class="f-link">📞 095-361-0489</span>
+      <span class="f-link">✉️ 67219100085@ptl.ac.th</span>
+      <span class="f-link">✉️ 67219100071@ptl.ac.th</span>
       <span class="f-link" onclick="go('contact')">💬 ส่งข้อความถึงเรา ›</span>
     </div>
   </div>
@@ -1716,12 +1717,15 @@ function setLang(key, announce){
    ============================================================ */
 const TTS_LANG = { th:'th', en:'en', zh:'zh-CN', ja:'ja', ko:'ko', fr:'fr' };
 
-/* 🌐 แหล่งเสียงออนไลน์หลายทาง — ถ้าทางแรกใช้ไม่ได้จะไล่ลองทางถัดไปให้อัตโนมัติ */
+/* 🌐 แหล่งเสียงออนไลน์หลายทาง — ถ้าทางแรกใช้ไม่ได้จะไล่ลองทางถัดไปให้อัตโนมัติ
+   หมายเหตุ: client=tw-ob คือตัวที่เล่นผ่าน <audio> ในเบราว์เซอร์ได้ดีที่สุด */
 const TTS_SOURCES = [
-  { name:'Google (gtx)',  url:(t,l) => `https://translate.googleapis.com/translate_tts?ie=UTF-8&client=gtx&tl=${encodeURIComponent(l)}&q=${encodeURIComponent(t)}` },
-  { name:'Google (tw-ob)',url:(t,l) => `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(l)}&q=${encodeURIComponent(t)}` },
-  { name:'Google (com)',  url:(t,l) => `https://translate.google.com/translate_tts?ie=UTF-8&client=gtx&tl=${encodeURIComponent(l)}&q=${encodeURIComponent(t)}` },
+  { name:'Google (tw-ob)',    url:(t,l) => `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(l)}&q=${encodeURIComponent(t)}` },
+  { name:'Google (gtx)',      url:(t,l) => `https://translate.googleapis.com/translate_tts?ie=UTF-8&client=gtx&tl=${encodeURIComponent(l)}&q=${encodeURIComponent(t)}` },
+  { name:'Google (tw-ob alt)',url:(t,l) => `https://translate.googleapis.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(l)}&q=${encodeURIComponent(t)}` },
 ];
+/* ถ้าเคยจำแหล่งเสียงจากเวอร์ชันก่อนไว้ ให้ล้างทิ้ง เพราะลำดับแหล่งเปลี่ยนแล้ว */
+if(localStorage.getItem('ttsVer') !== '2'){ localStorage.removeItem('ttsSrc'); localStorage.setItem('ttsVer','2'); }
 let ttsSrcIdx = parseInt(localStorage.getItem('ttsSrc') || '0', 10) || 0;
 const ttsUrl = (text, tl) => TTS_SOURCES[ttsSrcIdx % TTS_SOURCES.length].url(text, tl);
 
@@ -1774,8 +1778,10 @@ function playOnline(text, key){
 function playNextChunk(tries = 0){
   if(audioIdx >= audioQueue.length){ setTalking(false); curAudio = null; return }
   const item = audioQueue[audioIdx];
-  const a = new Audio(ttsUrl(item.text, item.tl));
-  a.crossOrigin = 'anonymous';
+  const a = new Audio();
+  /* ⚠️ ห้ามตั้ง a.crossOrigin เด็ดขาด — จะบังคับตรวจ CORS แล้วบริการเสียงจะโหลดไม่ผ่าน */
+  a.src = ttsUrl(item.text, item.tl);
+  a.preload = 'auto';
   curAudio = a;
   a.onended = () => { if(curAudio === a){ audioIdx++; playNextChunk() } };
   a.onerror = () => {
