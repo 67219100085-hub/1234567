@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>เที่ยวพัทลุง | เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม</title>
+<meta name="description" content="เว็บไซต์แนะนำสถานที่ท่องเที่ยวจังหวัดพัทลุง รวมที่เที่ยว ร้านอาหาร คาเฟ่ โรงแรม รีสอร์ท พร้อมแผนที่ ระยะทาง รีวิว และระบบเช็คอิน">
+<meta property="og:title" content="เที่ยวพัทลุง | เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม">
+<meta property="og:description" content="รวมที่เที่ยว ร้านอาหาร คาเฟ่ ที่พักทั่วเมืองลุง พร้อมแผนที่และรีวิวจากนักท่องเที่ยวจริง">
+<meta property="og:type" content="website">
 
 <!-- ===== Google Font: Prompt ===== -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -230,6 +234,181 @@ footer{margin-top:auto;background:var(--green-dark);color:#dcefe3;text-align:cen
 .badge.amber{background:#fdf0dc;color:#a9741d}
 .admin-tabs{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
 
+/* ============ ℹ️ เกี่ยวกับเรา / 📨 ติดต่อเรา ============ */
+.page-hero{background:linear-gradient(120deg,var(--green-dark),var(--green-mid));color:#fff;border-radius:20px;padding:2.4rem 2.6rem;box-shadow:var(--shadow)}
+.page-hero h1{font-size:1.9rem;font-weight:800}
+.page-hero p{font-weight:300;opacity:.92;margin-top:.4rem;line-height:1.8}
+.about-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-top:1.25rem}
+.about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-top:1.25rem}
+.about-card{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:1.4rem 1.5rem}
+.about-card .a-ic{font-size:1.8rem;margin-bottom:.5rem}
+.about-card h4{color:var(--green-dark);margin-bottom:.35rem}
+.about-card p{font-size:.88rem;color:var(--text-sub);line-height:1.75;font-weight:300}
+.contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:1.5rem;margin-top:1.25rem;align-items:start}
+.contact-card{display:flex;align-items:flex-start;gap:.9rem;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:1.1rem 1.25rem;margin-bottom:.9rem}
+.contact-card .c-ic{width:44px;height:44px;border-radius:12px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.contact-card .c-t{font-weight:600;font-size:.95rem}
+.contact-card .c-s{font-size:.84rem;color:var(--text-sub);margin-top:.1rem;line-height:1.6}
+@media (max-width:900px){ .contact-grid{grid-template-columns:1fr} }
+
+/* ============ 💬 รีวิว / ❤️ รายการโปรด / 🔥 ยอดนิยม / Footer Pro ============ */
+.place-card{position:relative}
+.fav-btn{position:absolute;top:.6rem;right:.6rem;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-size:1.05rem;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:transform .15s;z-index:2}
+.fav-btn:hover{transform:scale(1.15)}
+.pop-badge{position:absolute;top:.6rem;left:.6rem;background:rgba(214,69,69,.92);color:#fff;font-size:.74rem;font-weight:700;border-radius:999px;padding:.2rem .7rem;z-index:2}
+.sort-select{padding:.45rem .8rem;border:1.5px solid var(--gray-line);border-radius:999px;background:#fff;font-size:.85rem;outline:none;cursor:pointer}
+.sort-select:focus{border-color:var(--green-light)}
+.detail-actions{display:grid;grid-template-columns:1fr auto auto;gap:.6rem;margin-top:1.1rem}
+.detail-actions .icon-round{width:52px;height:52px;border-radius:14px;background:#fff;border:1.5px solid var(--gray-line);font-size:1.25rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.detail-actions .icon-round:hover{border-color:var(--green-light);transform:translateY(-2px)}
+.review-grid{display:grid;grid-template-columns:360px 1fr;gap:1.5rem;align-items:start}
+.stars-input{display:flex;gap:.3rem;margin-bottom:.8rem;font-size:1.6rem}
+.star-btn{background:none;filter:grayscale(1);opacity:.45;transition:all .12s;font-size:1.6rem}
+.star-btn.on{filter:none;opacity:1;transform:scale(1.08)}
+.review-item{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:1rem 1.2rem;margin-bottom:.9rem}
+.review-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem}
+.rv-avatar{width:38px;height:38px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rv-name{font-weight:600;font-size:.92rem}
+.rv-date{font-size:.75rem;color:var(--text-sub)}
+.rv-stars{color:var(--star);font-size:.9rem;letter-spacing:2px;margin-left:auto}
+.review-item p{font-size:.9rem;line-height:1.7;color:#3d4a44;font-weight:300;white-space:pre-wrap}
+@media (max-width:900px){ .review-grid{grid-template-columns:1fr} }
+/* Footer มืออาชีพ */
+footer{padding:0;text-align:left}
+.footer-grid{max-width:1180px;margin:0 auto;padding:2.2rem 1.25rem 1.4rem;display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:1.75rem}
+.footer-grid h5{font-size:.95rem;font-weight:700;margin-bottom:.7rem;color:#fff}
+.f-brand{font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:.5rem}
+.footer-grid p{font-size:.82rem;font-weight:300;line-height:1.8;opacity:.85}
+.f-link{display:block;font-size:.85rem;font-weight:300;opacity:.85;padding:.22rem 0;cursor:pointer;transition:opacity .15s, transform .15s}
+.f-link:hover{opacity:1;transform:translateX(3px);color:#a7e3c3}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.15);text-align:center;padding:1rem;font-size:.82rem;font-weight:300;opacity:.85}
+@media (max-width:800px){ .footer-grid{grid-template-columns:1fr 1fr} }
+/* ปุ่มกลับขึ้นบนสุด */
+.backtop{position:fixed;bottom:1.4rem;right:1.4rem;width:46px;height:46px;border-radius:50%;background:var(--green-dark);color:#fff;font-size:1.15rem;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:998;transform:translateY(10px)}
+.backtop.show{opacity:1;pointer-events:auto;transform:none}
+.backtop:hover{background:var(--green-mid)}
+
+/* ============================================================
+   ✨ ภาพเคลื่อนไหวน่ารัก ๆ (Cute Animations)
+   ============================================================ */
+/* 🖼️ รูปสถานที่: ชี้เมาส์แล้วซูม + เอียงนิด ๆ + มีแสงวาบพาดผ่าน */
+.place-card .img-wrap{position:relative;overflow:hidden;height:165px;border-radius:var(--radius) var(--radius) 0 0}
+.place-card .place-img{transition:transform .6s cubic-bezier(.2,.8,.3,1), filter .4s;height:100%}
+.place-card:hover .place-img{transform:scale(1.16) rotate(1.5deg);filter:saturate(1.18) brightness(1.05)}
+.place-card .img-wrap::after{
+  content:"";position:absolute;top:0;left:-75%;width:50%;height:100%;
+  background:linear-gradient(120deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 100%);
+  transform:skewX(-22deg);transition:left .75s ease;pointer-events:none;
+}
+.place-card:hover .img-wrap::after{left:135%}
+/* ป้ายเชิญชวนที่เลื่อนขึ้นมาตอนชี้เมาส์ */
+.hover-hint{
+  position:absolute;left:0;right:0;bottom:0;padding:.55rem;text-align:center;
+  background:linear-gradient(transparent,rgba(27,67,50,.88));color:#fff;font-size:.82rem;font-weight:600;
+  transform:translateY(100%);transition:transform .3s ease;pointer-events:none;
+}
+.place-card:hover .hover-hint{transform:translateY(0)}
+.place-card:hover{transform:translateY(-8px) scale(1.015)}
+.place-card:hover .place-name{color:var(--green-mid)}
+/* การ์ดค่อย ๆ ลอยขึ้นตอนโหลด */
+@keyframes popUp{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+.place-card,.svc-card,.nearby-card{animation:popUp .45s backwards}
+/* ไอคอนหมวดหมู่: เด้งดึ๋งตอนชี้ */
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-11deg)}75%{transform:rotate(11deg)}}
+.cat:hover .cat-circle{animation:wiggle .5s ease;background:var(--green-pale)}
+.cat.active .cat-circle{animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+/* หัวใจโปรดเต้นตอนกด */
+@keyframes heartPop{0%{transform:scale(1)}40%{transform:scale(1.5) rotate(-12deg)}100%{transform:scale(1)}}
+.fav-btn.pop{animation:heartPop .45s ease}
+/* ปุ่มหลักเรืองแสงเบา ๆ เชิญชวนให้กด */
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(82,183,136,.45)}50%{box-shadow:0 0 0 10px rgba(82,183,136,0)}}
+.checkin-btn,.detail-actions .btn-primary{animation:glow 2.6s infinite}
+/* ใบไม้/ผีเสื้อลอยใน Hero */
+.floaty{position:absolute;font-size:1.5rem;opacity:.75;pointer-events:none;animation:floatUp linear infinite}
+@keyframes floatUp{
+  0%{transform:translateY(20px) rotate(0);opacity:0}
+  15%{opacity:.8}
+  100%{transform:translateY(-320px) rotate(320deg);opacity:0}
+}
+/* ตัวอักษรหัวเรื่องขยับเบา ๆ */
+@keyframes breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.hero-title{animation:breathe 4s ease-in-out infinite}
+
+/* ============================================================
+   👘 น้องโนราห์ — มาสคอตหญิงชุดไทยประยุกต์ (SVG ทั้งตัว)
+   ============================================================ */
+.mascot-wrap{
+  position:fixed;left:1.1rem;bottom:1.1rem;z-index:997;
+  display:flex;align-items:flex-end;gap:.6rem;
+  transition:transform .4s cubic-bezier(.2,1.2,.3,1), opacity .35s;
+}
+.mascot-wrap.hide{transform:translateY(140%);opacity:0;pointer-events:none}
+.mascot-body{width:132px;flex-shrink:0;cursor:pointer;filter:drop-shadow(0 6px 14px rgba(27,67,50,.28))}
+/* ยืนโยกตัวเบา ๆ ตลอดเวลา */
+@keyframes sway{0%,100%{transform:rotate(-1.6deg) translateY(0)}50%{transform:rotate(1.6deg) translateY(-5px)}}
+#mascotAll{transform-origin:100px 300px;animation:sway 3.4s ease-in-out infinite}
+/* กระพริบตา */
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+.m-eye{transform-origin:center;animation:blink 4.2s infinite}
+/* โบกมือ (ตอนทักทาย/พูด) */
+@keyframes waveArm{0%,100%{transform:rotate(0)}30%{transform:rotate(-38deg)}60%{transform:rotate(-14deg)}}
+.m-arm-r{transform-origin:132px 168px}
+.mascot-wrap.talking .m-arm-r,.mascot-wrap.waving .m-arm-r{animation:waveArm 1.1s ease-in-out infinite}
+/* ปากขยับตอนพูด */
+@keyframes talkMouth{0%,100%{ry:2.2}50%{ry:6}}
+.mascot-wrap.talking .m-mouth{animation:talkMouth .32s ease-in-out infinite}
+/* กระโดดดีใจ */
+@keyframes hop{0%,100%{transform:translateY(0)}30%{transform:translateY(-22px)}55%{transform:translateY(0)}70%{transform:translateY(-9px)}}
+.mascot-wrap.happy .mascot-body{animation:hop .85s ease}
+/* กลีบดอกไม้เล็ก ๆ รอบตัว */
+@keyframes sparkle{0%{opacity:0;transform:translateY(0) scale(.5)}40%{opacity:1}100%{opacity:0;transform:translateY(-46px) scale(1.1)}}
+.m-sparkle{animation:sparkle 2.4s ease-in-out infinite}
+.m-sparkle:nth-child(2){animation-delay:.8s}
+.m-sparkle:nth-child(3){animation-delay:1.6s}
+
+/* 💬 กล่องคำพูด */
+.bubble{
+  position:relative;background:#fff;border-radius:18px;padding:.85rem 1.1rem;
+  max-width:290px;box-shadow:var(--shadow-lg);border:2px solid var(--green-pale);
+  font-size:.88rem;line-height:1.65;margin-bottom:2.6rem;
+  animation:popUp .3s backwards;
+}
+.bubble::after{
+  content:"";position:absolute;left:-11px;bottom:20px;width:0;height:0;
+  border:10px solid transparent;border-right-color:#fff;
+}
+.bubble .b-name{font-weight:700;color:var(--green-dark);font-size:.82rem;margin-bottom:.15rem;display:flex;align-items:center;gap:.3rem}
+.bubble .b-text{color:var(--text-main);font-weight:300;max-height:190px;overflow-y:auto}
+.bubble-actions{display:flex;gap:.4rem;margin-top:.6rem;flex-wrap:wrap}
+.bubble-actions button{border-radius:999px;padding:.3rem .8rem;font-size:.78rem;font-weight:600;background:var(--green-pale);color:var(--green-dark);transition:background .15s}
+.bubble-actions button:hover{background:var(--green-light);color:#fff}
+.bubble-close{position:absolute;top:.35rem;right:.5rem;background:none;font-size:.95rem;color:var(--text-sub);line-height:1}
+/* ปุ่มเรียกน้องโนราห์กลับมา */
+.mascot-call{
+  position:fixed;left:1.1rem;bottom:1.1rem;z-index:996;width:52px;height:52px;border-radius:50%;
+  background:var(--green-dark);color:#fff;font-size:1.4rem;box-shadow:var(--shadow-lg);
+  display:none;align-items:center;justify-content:center;animation:beat 2s infinite;
+}
+.mascot-call.show{display:flex}
+/* ปุ่มอ่านออกเสียงในหน้ารายละเอียด */
+.speak-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
+.speak-bar .btn{font-size:.85rem}
+.speaking-wave{display:inline-flex;gap:2px;align-items:flex-end;height:12px;margin-left:.35rem}
+.speaking-wave i{width:3px;background:currentColor;border-radius:2px;animation:eq .9s ease-in-out infinite}
+.speaking-wave i:nth-child(2){animation-delay:.15s}
+.speaking-wave i:nth-child(3){animation-delay:.3s}
+@keyframes eq{0%,100%{height:4px}50%{height:12px}}
+
+@media (max-width:640px){
+  .mascot-body{width:96px}
+  .bubble{max-width:190px;font-size:.82rem}
+}
+/* เคารพผู้ใช้ที่ปิดแอนิเมชัน */
+@media (prefers-reduced-motion:reduce){
+  *,*::after{animation:none!important;transition-duration:.01ms!important}
+}
+
 /* ============ ⚙️ ทั่วไป / Responsive ============ */
 .view{display:none;animation:fadeIn .3s ease}
 .view.active{display:block}
@@ -271,8 +450,8 @@ footer{margin-top:auto;background:var(--green-dark);color:#dcefe3;text-align:cen
     <div class="nav-links" id="navLinks">
       <a href="#" data-nav="home" class="active" onclick="go('home');return false;">หน้าแรก</a>
       <a href="#" data-nav="places" onclick="goPlaces();return false;">สถานที่ท่องเที่ยว</a>
-      <a href="#" onclick="go('home');scrollToSection('features');return false;">เกี่ยวกับเรา</a>
-      <a href="#" onclick="go('home');scrollToSection('footer');return false;">ติดต่อเรา</a>
+      <a href="#" data-nav="about" onclick="go('about');return false;">เกี่ยวกับเรา</a>
+      <a href="#" data-nav="contact" onclick="go('contact');return false;">ติดต่อเรา</a>
     </div>
     <div class="nav-actions">
       <button class="icon-btn" title="ค้นหา" onclick="focusSearch()">🔍</button>
@@ -305,10 +484,24 @@ footer{margin-top:auto;background:var(--green-dark);color:#dcefe3;text-align:cen
     <button class="cat" data-cat="ครอบครัว"  onclick="filterCategory('ครอบครัว')"><div class="cat-circle">👨‍👩‍👧‍👦</div><span>ครอบครัว</span></button>
   </section>
 
+  <!-- 🔥 ยอดนิยมจากการเช็คอิน (แสดงเมื่อมีข้อมูลเช็คอิน) -->
+  <section class="section" id="popularSection" style="display:none;padding-bottom:.25rem">
+    <div class="section-head"><h2 class="section-title">🔥 ยอดนิยมจากการเช็คอิน</h2></div>
+    <div class="grid-places" id="popularGrid"></div>
+  </section>
+
   <section class="section">
     <div class="section-head">
       <h2 class="section-title" id="placesTitle">สถานที่แนะนำ</h2>
-      <button class="link-more" onclick="goPlaces()">ดูทั้งหมด ›</button>
+      <div style="display:flex;gap:.6rem;align-items:center">
+        <select class="sort-select" id="sortSelect" onchange="setSort(this.value)">
+          <option value="default">เรียง: แนะนำ</option>
+          <option value="rating">⭐ คะแนนสูงสุด</option>
+          <option value="checkins">✅ เช็คอินมากสุด</option>
+          <option value="name">🔤 ชื่อ ก-ฮ</option>
+        </select>
+        <button class="link-more" onclick="goPlaces()">ดูทั้งหมด ›</button>
+      </div>
     </div>
     <div class="grid-places" id="placesGrid"></div>
   </section>
@@ -346,11 +539,41 @@ footer{margin-top:auto;background:var(--green-dark);color:#dcefe3;text-align:cen
         <div class="info-row"><div class="ic">🎟️</div><span class="lbl">ค่าเข้าชม</span><span class="val" id="dFee">-</span></div>
         <div class="info-row"><div class="ic">📞</div><span class="lbl">โทรศัพท์</span><span class="val" id="dPhone">-</span></div>
       </div>
-      <!-- ✅ ปุ่มเช็คอิน: บันทึกประวัติว่ามาเที่ยวที่นี่แล้ว -->
-      <button class="btn btn-primary checkin-btn" onclick="doCheckin()">✅ เช็คอินที่นี่</button>
+      <!-- ✅ เช็คอิน / ❤️ รายการโปรด / 🔗 แชร์ -->
+      <div class="detail-actions">
+        <button class="btn btn-primary" style="padding:.85rem;font-size:1rem" onclick="doCheckin()">✅ เช็คอินที่นี่</button>
+        <button class="icon-round" id="dFavBtn" title="เพิ่ม/นำออกจากรายการโปรด" onclick="toggleFav(state.currentPlace?.id)">🤍</button>
+        <button class="icon-round" title="แชร์สถานที่นี้" onclick="sharePlace()">🔗</button>
+      </div>
       <div class="checkin-count" id="checkinCount"></div>
+      <!-- 🔊 อ่านออกเสียงรายละเอียดสถานที่ -->
+      <div class="speak-bar">
+        <button class="btn btn-light" id="btnSpeakDetail" onclick="mascotReadPlace()">🔊 ให้น้องโนราห์อ่านให้ฟัง</button>
+        <button class="btn btn-outline" onclick="stopSpeak()">⏹ หยุดอ่าน</button>
+      </div>
     </div>
   </div>
+
+  <!-- 💬 รีวิวจากนักท่องเที่ยว -->
+  <section class="section">
+    <div class="section-head">
+      <h2 class="section-title">💬 รีวิวจากนักท่องเที่ยว (<span id="rvCount">0</span>)</h2>
+      <span class="badge" id="rvAvg">★ ยังไม่มีรีวิว</span>
+    </div>
+    <div class="review-grid">
+      <div class="panel">
+        <h3>✍️ เขียนรีวิวของคุณ</h3>
+        <div class="stars-input" id="starsInput"></div>
+        <div class="form-group">
+          <textarea id="rvText" placeholder="เล่าประสบการณ์ของคุณที่นี่... บรรยากาศเป็นยังไง มีอะไรน่าประทับใจบ้าง"></textarea>
+        </div>
+        <button class="btn btn-primary w-full" onclick="submitReview()">📝 ส่งรีวิว</button>
+        <div class="form-msg" id="rvMsg"></div>
+        <p class="hint" style="text-align:center;margin-top:.5rem">💡 รีวิวได้คนละ 1 ครั้งต่อสถานที่ (ส่งซ้ำ = แก้ไขรีวิวเดิม)</p>
+      </div>
+      <div id="reviewList"></div>
+    </div>
+  </section>
 
   <section class="section">
     <div class="section-head"><h2 class="section-title">🏕️ สถานที่ใกล้เคียง</h2></div>
@@ -451,6 +674,64 @@ footer{margin-top:auto;background:var(--green-dark);color:#dcefe3;text-align:cen
         </table>
       </div>
     </div>
+
+    <div class="panel" style="margin-top:1.25rem">
+      <h3>❤️ สถานที่โปรดของฉัน (<span id="pfFavCount">0</span>)</h3>
+      <div class="grid-places" id="pfFavGrid"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════ ℹ️ VIEW: เกี่ยวกับเรา ═══════════════ -->
+<main id="about-view" class="view">
+  <div class="section">
+    <div class="page-hero">
+      <h1>🌿 เกี่ยวกับ "เที่ยวพัทลุง"</h1>
+      <p>เว็บไซต์แนะนำสถานที่ท่องเที่ยวจังหวัดพัทลุง จัดทำขึ้นเพื่อรวบรวมแหล่งท่องเที่ยว ร้านอาหาร คาเฟ่ และที่พักทั่วเมืองลุงไว้ในที่เดียว
+พัทลุงคือเมืองเล็ก ๆ ริมทะเลสาบสงขลาที่เต็มไปด้วยธรรมชาติบริสุทธิ์ วิถีชีวิตเรียบง่าย และผู้คนมีน้ำใจ — เราอยากชวนทุกคนมาสัมผัสด้วยตัวเอง</p>
+      <div class="about-stats">
+        <div class="stat-card"><div class="stat-ic">🏞️</div><div><div class="stat-num" id="abPlaces">0</div><div class="stat-lbl">สถานที่ท่องเที่ยว</div></div></div>
+        <div class="stat-card"><div class="stat-ic">🏨</div><div><div class="stat-num" id="abServices">0</div><div class="stat-lbl">บริการใกล้เคียง</div></div></div>
+        <div class="stat-card"><div class="stat-ic">👥</div><div><div class="stat-num" id="abUsers">0</div><div class="stat-lbl">สมาชิกของเรา</div></div></div>
+        <div class="stat-card"><div class="stat-ic">✅</div><div><div class="stat-num" id="abCheckins">0</div><div class="stat-lbl">เช็คอินแล้ว (ครั้ง)</div></div></div>
+      </div>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-card"><div class="a-ic">🎯</div><h4>จุดประสงค์ของเรา</h4><p>ส่งเสริมการท่องเที่ยวจังหวัดพัทลุง กระจายรายได้สู่ชุมชนท้องถิ่น และเป็นคู่มือเที่ยวออนไลน์ที่ครบจบในเว็บเดียว ทั้งข้อมูลสถานที่ เวลาเปิด-ปิด ค่าเข้าชม และแผนที่นำทาง</p></div>
+      <div class="about-card"><div class="a-ic">🗺️</div><h4>ฟีเจอร์เด่น</h4><p>ค้นหาและกรองตามหมวดหมู่ ดูสถานที่และบริการใกล้เคียงพร้อมระยะทางจริง แผนที่อินเทอร์แอคทีฟ ระบบเช็คอินเก็บประวัติการเดินทาง และระบบสมาชิกใช้งานง่าย</p></div>
+      <div class="about-card"><div class="a-ic">💚</div><h4>แนวคิดการออกแบบ</h4><p>เรียบง่าย สะอาดตา ใช้งานง่ายบนทุกอุปกรณ์ เลือกใช้โทนสีเขียวธรรมชาติสื่อถึงความอุดมสมบูรณ์ของเมืองพัทลุง "เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม"</p></div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════ 📨 VIEW: ติดต่อเรา ═══════════════ -->
+<main id="contact-view" class="view">
+  <div class="section">
+    <div class="page-hero">
+      <h1>📨 ติดต่อเรา</h1>
+      <p>มีคำถาม อยากแนะนำสถานที่เพิ่ม หรือพบข้อมูลผิดพลาด ส่งข้อความหาเราได้เลย ทีมงานยินดีรับฟังทุกความคิดเห็น</p>
+    </div>
+
+    <div class="contact-grid">
+      <!-- ช่องทางติดต่อ -->
+      <div>
+        <div class="contact-card"><div class="c-ic">📍</div><div><div class="c-t">ที่อยู่</div><div class="c-s">สำนักงานการท่องเที่ยวจังหวัดพัทลุง<br>ถ.ราเมศวร์ ต.คูหาสวรรค์ อ.เมือง จ.พัทลุง 93000</div></div></div>
+        <div class="contact-card"><div class="c-ic">📞</div><div><div class="c-t">โทรศัพท์</div><div class="c-s">074-611-201 (จ.-ศ. 08.30 - 16.30 น.)</div></div></div>
+        <div class="contact-card"><div class="c-ic">✉️</div><div><div class="c-t">อีเมล</div><div class="c-s">contact@teawphatthalung.com</div></div></div>
+        <div class="contact-card"><div class="c-ic">💬</div><div><div class="c-t">โซเชียลมีเดีย</div><div class="c-s">Facebook / TikTok / Instagram: @teawphatthalung</div></div></div>
+      </div>
+
+      <!-- ฟอร์มส่งข้อความ (บันทึกเข้าฐานข้อมูล ให้แอดมินอ่านได้) -->
+      <div class="panel">
+        <h3>✍️ ส่งข้อความถึงเรา</h3>
+        <div class="form-group"><label for="ctName">ชื่อของคุณ *</label><input type="text" id="ctName" placeholder="ชื่อ-นามสกุล หรือชื่อเล่น"></div>
+        <div class="form-group"><label for="ctContact">ช่องทางติดต่อกลับ</label><input type="text" id="ctContact" placeholder="อีเมล หรือเบอร์โทร (ไม่บังคับ)"></div>
+        <div class="form-group"><label for="ctMsg">ข้อความ *</label><textarea id="ctMsg" placeholder="พิมพ์ข้อความของคุณที่นี่..."></textarea></div>
+        <button class="btn btn-primary w-full" onclick="sendMessage()">📩 ส่งข้อความ</button>
+        <div class="form-msg" id="ctFormMsg"></div>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -513,6 +794,8 @@ footer{margin-top:auto;background:var(--green-dark);color:#dcefe3;text-align:cen
         <button class="btn btn-outline" id="tab-services" onclick="setAdminTab('services')">🏨 บริการ</button>
         <button class="btn btn-outline" id="tab-users"    onclick="setAdminTab('users')">👥 สมาชิก</button>
         <button class="btn btn-outline" id="tab-checkins" onclick="setAdminTab('checkins')">✅ เช็คอิน</button>
+        <button class="btn btn-outline" id="tab-messages" onclick="setAdminTab('messages')">📨 ข้อความ</button>
+        <button class="btn btn-outline" id="tab-reviews" onclick="setAdminTab('reviews')">💬 รีวิว</button>
       </div>
       <div style="overflow-x:auto">
         <table class="admin-table">
@@ -524,7 +807,157 @@ footer{margin-top:auto;background:var(--green-dark);color:#dcefe3;text-align:cen
   </div>
 </main>
 
-<footer id="footer">© 2024 เที่ยวพัทลุง | เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม <span class="conn-dot" id="connStatus"></span></footer>
+<!-- ═══════════════ 👘 น้องโนราห์ — ผู้ช่วยนำเที่ยวชุดไทยประยุกต์ ═══════════════ -->
+<div class="mascot-wrap hide" id="mascot">
+  <!-- ตัวการ์ตูนวาดด้วย SVG ทั้งตัว (ไม่ต้องโหลดรูปภาพจากภายนอก) -->
+  <svg class="mascot-body" viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" onclick="mascotTap()">
+    <defs>
+      <linearGradient id="skirtG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2d6a4f"/><stop offset="100%" stop-color="#1b4332"/>
+      </linearGradient>
+      <linearGradient id="sabaiG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#f7d27a"/><stop offset="100%" stop-color="#e0a63c"/>
+      </linearGradient>
+    </defs>
+
+    <g id="mascotAll">
+      <!-- ประกายรอบตัว -->
+      <text class="m-sparkle" x="24" y="120" font-size="15">✨</text>
+      <text class="m-sparkle" x="168" y="150" font-size="13">🌸</text>
+      <text class="m-sparkle" x="16" y="200" font-size="12">🌿</text>
+
+      <!-- เงาใต้เท้า -->
+      <ellipse cx="100" cy="300" rx="46" ry="7" fill="#1b4332" opacity=".16"/>
+
+      <!-- ผ้าถุง (กระโปรงไทย) ลายเชิง -->
+      <path d="M62 196 Q100 186 138 196 L152 292 Q100 302 48 292 Z" fill="url(#skirtG)"/>
+      <path d="M50 276 Q100 288 150 276 L152 292 Q100 302 48 292 Z" fill="#e0a63c" opacity=".92"/>
+      <path d="M56 250 Q100 260 144 250" stroke="#f7d27a" stroke-width="2.5" fill="none" opacity=".65"/>
+      <path d="M53 266 Q100 276 147 266" stroke="#f7d27a" stroke-width="2" fill="none" opacity=".5"/>
+      <!-- จีบหน้านาง -->
+      <path d="M100 190 L100 288" stroke="#143026" stroke-width="2" opacity=".35"/>
+
+      <!-- เท้า -->
+      <ellipse cx="84" cy="296" rx="11" ry="5" fill="#f2c9a0"/>
+      <ellipse cx="118" cy="296" rx="11" ry="5" fill="#f2c9a0"/>
+
+      <!-- ลำตัว / เสื้อ -->
+      <path d="M70 128 Q100 118 130 128 L136 200 Q100 210 64 200 Z" fill="#ffffff"/>
+      <!-- สไบเฉียง (ผ้าพาดไหล่) -->
+      <path d="M74 130 Q104 152 132 196 L118 202 Q92 160 68 142 Z" fill="url(#sabaiG)"/>
+      <path d="M78 133 Q106 154 130 192" stroke="#c98a22" stroke-width="1.5" fill="none" opacity=".55"/>
+      <!-- เข็มขัดทอง -->
+      <rect x="64" y="192" width="72" height="10" rx="5" fill="#e0a63c"/>
+      <circle cx="100" cy="197" r="4.5" fill="#f7d27a"/>
+
+      <!-- แขนซ้าย (ประนมไว้ข้างตัว) -->
+      <path d="M70 138 Q56 168 62 196" stroke="#f2c9a0" stroke-width="13" stroke-linecap="round" fill="none"/>
+      <circle cx="63" cy="199" r="7.5" fill="#f2c9a0"/>
+      <!-- แขนขวา (โบกทักทาย) -->
+      <g class="m-arm-r">
+        <path d="M132 138 Q150 160 146 176" stroke="#f2c9a0" stroke-width="13" stroke-linecap="round" fill="none"/>
+        <circle cx="146" cy="178" r="8.5" fill="#f2c9a0"/>
+      </g>
+
+      <!-- คอ -->
+      <rect x="93" y="112" width="14" height="16" rx="6" fill="#f2c9a0"/>
+      <!-- สร้อยลูกปัดโนราห์ -->
+      <path d="M84 126 Q100 140 116 126" stroke="#e0a63c" stroke-width="2.5" fill="none"/>
+      <circle cx="92" cy="133" r="2.4" fill="#f5a3b8"/>
+      <circle cx="100" cy="136" r="2.8" fill="#f7d27a"/>
+      <circle cx="108" cy="133" r="2.4" fill="#f5a3b8"/>
+
+      <!-- ผมด้านหลัง (มวยผม) -->
+      <ellipse cx="100" cy="74" rx="42" ry="44" fill="#2b2118"/>
+      <circle cx="100" cy="34" r="15" fill="#2b2118"/>
+
+      <!-- 👑 เทริดโนราห์ (เครื่องสวมศีรษะศิลปะโนราห์ปักษ์ใต้) -->
+      <g class="m-crown">
+        <path d="M78 44 Q100 6 122 44 Z" fill="#e0a63c"/>
+        <path d="M82 44 Q100 14 118 44 Z" fill="#f7d27a"/>
+        <path d="M100 8 L103 20 L97 20 Z" fill="#f7d27a"/>
+        <circle cx="100" cy="6" r="3.4" fill="#f5a3b8"/>
+        <rect x="74" y="42" width="52" height="8" rx="4" fill="#e0a63c"/>
+        <circle cx="84" cy="46" r="2.2" fill="#f5a3b8"/>
+        <circle cx="100" cy="46" r="2.6" fill="#fff3cf"/>
+        <circle cx="116" cy="46" r="2.2" fill="#f5a3b8"/>
+      </g>
+
+      <!-- ใบหน้า -->
+      <ellipse cx="100" cy="80" rx="33" ry="36" fill="#fcdcbd"/>
+      <!-- ผมหน้าม้า -->
+      <path d="M67 72 Q72 40 100 38 Q128 40 133 72 Q120 54 100 58 Q80 54 67 72 Z" fill="#2b2118"/>
+      <!-- ดอกไม้ทัดผม -->
+      <g transform="translate(136,58)">
+        <circle r="5" fill="#f5a3b8"/><circle cx="-6" cy="-3" r="4.5" fill="#f8bcca"/>
+        <circle cx="5" cy="-5" r="4.5" fill="#f8bcca"/><circle cx="1" cy="6" r="4.5" fill="#f8bcca"/>
+        <circle r="2.4" fill="#f7d27a"/>
+      </g>
+      <!-- ต่างหูทอง -->
+      <circle cx="68" cy="88" r="3.6" fill="#e0a63c"/>
+      <circle cx="132" cy="88" r="3.6" fill="#e0a63c"/>
+
+      <!-- ตา -->
+      <ellipse class="m-eye" cx="88" cy="80" rx="5.2" ry="6.4" fill="#2b2118"/>
+      <ellipse class="m-eye" cx="112" cy="80" rx="5.2" ry="6.4" fill="#2b2118"/>
+      <circle cx="90" cy="77.5" r="1.9" fill="#fff"/>
+      <circle cx="114" cy="77.5" r="1.9" fill="#fff"/>
+      <!-- คิ้ว -->
+      <path d="M81 69 Q88 65 95 69" stroke="#2b2118" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M105 69 Q112 65 119 69" stroke="#2b2118" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <!-- แก้มชมพู -->
+      <ellipse cx="79" cy="92" rx="6.5" ry="4.2" fill="#f7a9ab" opacity=".65"/>
+      <ellipse cx="121" cy="92" rx="6.5" ry="4.2" fill="#f7a9ab" opacity=".65"/>
+      <!-- ปาก (ขยับตอนพูด) -->
+      <ellipse class="m-mouth" cx="100" cy="97" rx="6" ry="2.2" fill="#d2646f"/>
+    </g>
+  </svg>
+
+  <!-- กล่องคำพูด -->
+  <div class="bubble" id="mascotBubble">
+    <button class="bubble-close" onclick="hideMascot()" title="ซ่อนน้องโนราห์">✕</button>
+    <div class="b-name">👘 น้องโนราห์ <span id="mascotStatus"></span></div>
+    <div class="b-text" id="mascotText">สวัสดีค่ะ! หนูชื่อน้องโนราห์ ผู้ช่วยนำเที่ยวเมืองพัทลุงค่ะ 💚</div>
+    <div class="bubble-actions">
+      <button onclick="mascotReadPlace()" id="btnMascotRead">🔊 อ่านให้ฟัง</button>
+      <button onclick="stopSpeak()">⏹ หยุด</button>
+      <button onclick="mascotTip()">💡 เกร็ดน่ารู้</button>
+    </div>
+  </div>
+</div>
+<button class="mascot-call" id="mascotCall" title="เรียกน้องโนราห์" onclick="showMascot(true)">👘</button>
+
+<footer id="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="f-brand">⛰️ เที่ยวพัทลุง</div>
+      <p>เว็บไซต์แนะนำสถานที่ท่องเที่ยวจังหวัดพัทลุง รวมที่เที่ยว ร้านอาหาร คาเฟ่ และที่พัก พร้อมแผนที่ ระยะทาง รีวิว และระบบเช็คอิน — เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม</p>
+    </div>
+    <div>
+      <h5>เมนูลัด</h5>
+      <span class="f-link" onclick="go('home')">หน้าแรก</span>
+      <span class="f-link" onclick="goPlaces()">สถานที่ท่องเที่ยว</span>
+      <span class="f-link" onclick="go('about')">เกี่ยวกับเรา</span>
+      <span class="f-link" onclick="go('contact')">ติดต่อเรา</span>
+    </div>
+    <div>
+      <h5>หมวดหมู่ยอดนิยม</h5>
+      <span class="f-link" onclick="go('home');filterCategory('ธรรมชาติ')">🌿 ธรรมชาติ</span>
+      <span class="f-link" onclick="go('home');filterCategory('วัด/ศาสนา')">🛕 วัด / ศาสนา</span>
+      <span class="f-link" onclick="go('home');filterCategory('คาเฟ่')">☕ คาเฟ่</span>
+      <span class="f-link" onclick="go('home');filterCategory('ถ่ายรูป')">📷 ถ่ายรูป</span>
+    </div>
+    <div>
+      <h5>ติดต่อ</h5>
+      <span class="f-link">📍 อ.เมือง จ.พัทลุง 93000</span>
+      <span class="f-link">📞 074-611-201</span>
+      <span class="f-link">✉️ contact@teawphatthalung.com</span>
+      <span class="f-link" onclick="go('contact')">💬 ส่งข้อความถึงเรา ›</span>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2024 เที่ยวพัทลุง | เมืองน่าอยู่ ผู้คนมีน้ำใจ ธรรมชาติสวยงาม <span class="conn-dot" id="connStatus"></span></div>
+</footer>
+<button class="backtop" id="backTop" title="กลับขึ้นบนสุด" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 <div class="toast" id="toast"></div>
 
 <!-- ═══ Firebase Realtime Database (compat — สไตล์เดียวกับไฟล์ตัวอย่าง) ═══ -->
@@ -538,14 +971,14 @@ footer{margin-top:auto;background:var(--green-dark);color:#dcefe3;text-align:cen
    ⚙️ FIREBASE CONFIG — โค้ดเดิมของคุณ ไม่เปลี่ยน ✅
    ============================================================ */
 const firebaseConfig = {
-  apiKey: "AIzaSyBI3sTGldVXBE6dj6at47LL0-dSqEgL9TI",
-  authDomain: "acbce-72e69.firebaseapp.com",
-  databaseURL: "https://acbce-72e69-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "acbce-72e69",
-  storageBucket: "acbce-72e69.firebasestorage.app",
-  messagingSenderId: "863082132334",
-  appId: "1:863082132334:web:f35ecf57389b873a39877f",
-  measurementId: "G-N8DJR9167Q"
+  apiKey: "AIzaSyDne9cjxn62FGHPO_uw0l70kjXID0Pjnkc",
+  authDomain: "fern-1cfc2.firebaseapp.com",
+  databaseURL: "https://fern-1cfc2-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "fern-1cfc2",
+  storageBucket: "fern-1cfc2.firebasestorage.app",
+  messagingSenderId: "704257571964",
+  appId: "1:704257571964:web:f4bc45f030e2ef22c31df9",
+  measurementId: "G-SN3MGFC6CL"
 };
 
 /* ใช้ Firebase เมื่อโหลด SDK สำเร็จและใส่คีย์แล้ว, ถ้าไม่ → โหมดออฟไลน์ localStorage */
@@ -619,8 +1052,8 @@ const DEFAULT_SERVICES = [
    คีย์ที่ใช้: places, services, users, checkins
    ============================================================ */
 let fdb = null;
-const cache = { places:null, services:null, users:null, checkins:null };
-const KEYS = ['places','services','users','checkins'];
+const cache = { places:null, services:null, users:null, checkins:null, messages:null, reviews:null, favorites:null };
+const KEYS = ['places','services','users','checkins','messages','reviews','favorites'];
 
 let _ready = false, _readyCbs = [];
 function whenReady(cb){ _ready ? cb() : _readyCbs.push(cb) }
@@ -645,10 +1078,14 @@ function setConnStatus(t){ const el = document.getElementById('connStatus'); if(
 
 /* เมื่อข้อมูลเปลี่ยน (จากเครื่องอื่น) → รีเฟรชหน้าที่กำลังเปิดอยู่ */
 function onDataChanged(key){
-  if(key === 'places' || key === 'services') renderPlaces();
+  renderPlaces();  /* ครอบคลุมการ์ด หัวใจโปรด และส่วนยอดนิยม */
   refreshAdmin();
   if(document.getElementById('profile-view').classList.contains('active')) renderProfile();
-  if(state.currentPlace && (key === 'checkins')) updateCheckinCount();
+  if(state.currentPlace){
+    if(key === 'checkins') updateCheckinCount();
+    if(key === 'reviews')  renderReviews(state.currentPlace);
+    if(key === 'favorites') updateFavUI();
+  }
 }
 
 const DATA_VERSION = '1';
@@ -687,8 +1124,11 @@ function initData(){
     DB.set('services', DEFAULT_SERVICES);
     localStorage.setItem('data_version', DATA_VERSION);
   }
-  if(!localStorage.getItem('users'))    DB.set('users', []);
-  if(!localStorage.getItem('checkins')) DB.set('checkins', []);
+  if(!localStorage.getItem('users'))     DB.set('users', []);
+  if(!localStorage.getItem('checkins'))  DB.set('checkins', []);
+  if(!localStorage.getItem('messages'))  DB.set('messages', []);
+  if(!localStorage.getItem('reviews'))   DB.set('reviews', []);
+  if(!localStorage.getItem('favorites')) DB.set('favorites', []);
   setConnStatus('โหมดออฟไลน์ (localStorage)');
   markReady();
 }
@@ -696,7 +1136,7 @@ function initData(){
 /* ============================================================
    🧰 Utilities
    ============================================================ */
-const state = { activeCategory:null, currentPlace:null, svcType:"all", adminTab:"places" };
+const state = { activeCategory:null, currentPlace:null, svcType:"all", adminTab:"places", sortMode:"default", rvStars:5 };
 const $ = (id) => document.getElementById(id);
 const esc = (s="") => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 const FALLBACK_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400'><rect width='100%' height='100%' fill='%23d8f3dc'/><text x='50%' y='54%' font-size='48' text-anchor='middle'>🏞️</text></svg>";
@@ -815,6 +1255,8 @@ function doCheckin(){
   DB.set('checkins', list);
   updateCheckinCount();
   toast(`✅ เช็คอิน "${p.name}" สำเร็จ!`);
+  doHappy();
+  mascotSay(`เย้! เช็คอินที่ ${p.name} สำเร็จแล้วค่ะ เก็บไว้ในประวัติการเดินทางของคุณเรียบร้อยนะคะ 🎉`, true);
 }
 
 /* โชว์จำนวนเช็คอินรวมของสถานที่นี้ใต้ปุ่ม */
@@ -845,6 +1287,284 @@ function renderProfile(){
   $("pfCheckinBody").innerHTML = my.length
     ? my.map((c,i) => `<tr><td>${i+1}</td><td>${esc(c.placeName)}</td><td>${esc(c.district)}</td><td>${esc(c.date)}</td><td>${esc(c.time)}</td></tr>`).join('')
     : `<tr><td colspan="5" style="text-align:center;color:var(--text-sub);padding:1.5rem">ยังไม่มีประวัติเช็คอิน — ไปเที่ยวแล้วกดเช็คอินได้เลย!</td></tr>`;
+
+  /* ❤️ สถานที่โปรดของฉัน */
+  const favIds = DB.get('favorites').filter(f => f.username === u.username).map(f => f.placeId);
+  const favPlaces = DB.get('places').filter(p => favIds.includes(p.id));
+  $("pfFavCount").textContent = favPlaces.length;
+  $("pfFavGrid").innerHTML = favPlaces.length
+    ? favPlaces.map(p => placeCardHtml(p)).join("")
+    : `<div class="empty-note">ยังไม่มีสถานที่โปรด — กดหัวใจ 🤍 บนการ์ดสถานที่ที่ชอบได้เลย</div>`;
+}
+
+/* ============================================================
+   ❤️ รายการโปรด (Favorites) — เก็บใน DB ซิงก์ทุกเครื่อง
+   ============================================================ */
+function isFav(placeId){
+  const u = currentUser();
+  return !!u && DB.get('favorites').some(f => f.username === u.username && f.placeId === placeId);
+}
+
+function toggleFav(placeId, btnEl){
+  if(!placeId) return;
+  const u = currentUser();
+  if(!u){ toast('🙏 กรุณาเข้าสู่ระบบก่อนบันทึกรายการโปรด'); go('auth'); return }
+  if(btnEl){ btnEl.classList.remove('pop'); void btnEl.offsetWidth; btnEl.classList.add('pop'); }
+  let favs = DB.get('favorites');
+  if(isFav(placeId)){
+    favs = favs.filter(f => !(f.username === u.username && f.placeId === placeId));
+    toast('💔 นำออกจากรายการโปรดแล้ว');
+  } else {
+    favs.push({ username:u.username, placeId });
+    toast('❤️ เพิ่มในรายการโปรดแล้ว');
+  }
+  DB.set('favorites', favs);
+  renderPlaces();
+  updateFavUI();
+  if(document.getElementById('profile-view').classList.contains('active')) renderProfile();
+}
+
+function updateFavUI(){
+  const p = state.currentPlace;
+  if(!p) return;
+  $("dFavBtn").textContent = isFav(p.id) ? "❤️" : "🤍";
+}
+
+/* ============================================================
+   🔗 แชร์สถานที่
+   ============================================================ */
+function sharePlace(){
+  const p = state.currentPlace;
+  if(!p) return;
+  const text = `📍 ${p.name} (${p.district||""} จ.พัทลุง) ★ ${effectiveRating(p).toFixed(1)}\n${p.description||""}\n— จากเว็บเที่ยวพัทลุง`;
+  if(navigator.share){
+    navigator.share({ title:p.name, text }).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text);
+    toast('📋 คัดลอกข้อมูลสถานที่แล้ว นำไปแชร์ต่อได้เลย');
+  } else {
+    toast('⚠️ เบราว์เซอร์นี้ไม่รองรับการแชร์');
+  }
+}
+
+/* ============================================================
+   💬 ระบบรีวิว + ให้ดาว (คนละ 1 รีวิวต่อสถานที่ ส่งซ้ำ = แก้ไข)
+   ============================================================ */
+function buildStarsInput(){
+  $("starsInput").innerHTML = [1,2,3,4,5].map(n =>
+    `<button class="star-btn${n <= state.rvStars ? " on" : ""}" data-star="${n}" onclick="setRvStars(${n})">⭐</button>`).join("");
+}
+function setRvStars(n){ state.rvStars = n; buildStarsInput(); }
+
+function submitReview(){
+  const u = currentUser();
+  if(!u){ toast('🙏 กรุณาเข้าสู่ระบบก่อนเขียนรีวิว'); go('auth'); return }
+  const p = state.currentPlace;
+  if(!p) return;
+  const text = $("rvText").value.trim();
+  const show = (t, ok) => { const el = $("rvMsg"); el.className = 'form-msg' + (t ? (ok ? ' success' : ' error') : ''); el.textContent = t; };
+  if(!text) return show('กรุณาพิมพ์ข้อความรีวิว');
+
+  const list = DB.get('reviews');
+  const idx = list.findIndex(r => r.username === u.username && r.placeId === p.id);
+  const rec = {
+    id: idx >= 0 ? list[idx].id : Date.now(),
+    username: u.username,
+    placeId: p.id,
+    placeName: p.name,
+    stars: state.rvStars,
+    text,
+    date: new Date().toLocaleDateString('th-TH'),
+  };
+  if(idx >= 0){ list[idx] = rec; toast('✏️ อัปเดตรีวิวของคุณแล้ว'); }
+  else { list.push(rec); toast('✅ ขอบคุณสำหรับรีวิว!'); }
+  DB.set('reviews', list);
+  $("rvText").value = "";
+  show('');
+  renderReviews(p);
+  renderPlaces();  /* คะแนนบนการ์ดเปลี่ยนตามรีวิว */
+  $("dRating").textContent = effectiveRating(p).toFixed(1);
+}
+
+function renderReviews(p){
+  const rs = placeReviews(p.id).slice().reverse();
+  $("rvCount").textContent = rs.length;
+  $("rvAvg").textContent = rs.length
+    ? `★ เฉลี่ย ${(rs.reduce((s,r) => s + Number(r.stars||0), 0) / rs.length).toFixed(1)} จาก ${rs.length} รีวิว`
+    : '★ ยังไม่มีรีวิว';
+
+  /* ถ้าผู้ใช้เคยรีวิวแล้ว เติมข้อความเดิมให้แก้ไขได้ */
+  const u = currentUser();
+  const mine = u ? rs.find(r => r.username === u.username) : null;
+  if(mine){ $("rvText").value = mine.text; state.rvStars = mine.stars; }
+  else { $("rvText").value = ""; state.rvStars = 5; }
+  buildStarsInput();
+
+  $("reviewList").innerHTML = rs.length ? rs.map(r => `
+    <div class="review-item">
+      <div class="review-head">
+        <div class="rv-avatar">👤</div>
+        <div>
+          <div class="rv-name">${esc(r.username)}</div>
+          <div class="rv-date">${esc(r.date||"")}</div>
+        </div>
+        <div class="rv-stars">${"★".repeat(Number(r.stars||0))}${"☆".repeat(5 - Number(r.stars||0))}</div>
+      </div>
+      <p>${esc(r.text)}</p>
+    </div>`).join("")
+    : `<div class="empty-note">ยังไม่มีรีวิว — มาเป็นคนแรกที่แบ่งปันประสบการณ์กันเถอะ!</div>`;
+}
+
+/* ============================================================
+   👘🔊 น้องโนราห์ — ผู้ช่วยนำเที่ยว + ระบบอ่านออกเสียงภาษาไทย
+   ใช้ Web Speech API (SpeechSynthesis) ที่มีในเบราว์เซอร์ ไม่ต้องติดตั้งอะไรเพิ่ม
+   ============================================================ */
+const synth = window.speechSynthesis;
+let thaiVoice = null;
+
+/* ค้นหาเสียงภาษาไทยในเครื่องผู้ใช้ (บางเบราว์เซอร์โหลดรายการเสียงช้า) */
+function pickThaiVoice(){
+  if(!synth) return;
+  const vs = synth.getVoices();
+  thaiVoice = vs.find(v => v.lang === 'th-TH')
+           || vs.find(v => (v.lang||'').toLowerCase().startsWith('th'))
+           || null;
+}
+if(synth){
+  pickThaiVoice();
+  synth.onvoiceschanged = pickThaiVoice;
+}
+
+/* พูดข้อความ + ให้น้องโนราห์ขยับปากและโบกมือไปด้วย */
+function speak(text, onEnd){
+  if(!text) return;
+  if(!synth){ toast('⚠️ เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง'); return }
+  synth.cancel();                       /* หยุดข้อความเดิมก่อนเสมอ */
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'th-TH';
+  if(thaiVoice) utt.voice = thaiVoice;
+  utt.rate = 0.96;                      /* ช้าลงนิดให้ฟังชัด */
+  utt.pitch = 1.15;                     /* เสียงสูงนิด ๆ ให้น่ารัก */
+  utt.onstart = () => setTalking(true);
+  utt.onend   = () => { setTalking(false); onEnd && onEnd(); };
+  utt.onerror = () => setTalking(false);
+  synth.speak(utt);
+}
+
+function stopSpeak(){
+  if(synth) synth.cancel();
+  setTalking(false);
+}
+
+function setTalking(on){
+  const m = $("mascot");
+  if(m) m.classList.toggle('talking', on);
+  const st = $("mascotStatus");
+  if(st) st.innerHTML = on ? '<span class="speaking-wave"><i></i><i></i><i></i></span>' : '';
+  const b = $("btnSpeakDetail");
+  if(b) b.textContent = on ? '🔊 กำลังอ่าน...' : '🔊 ให้น้องโนราห์อ่านให้ฟัง';
+}
+
+/* แสดง / ซ่อนน้องโนราห์ */
+function showMascot(withGreeting){
+  $("mascot").classList.remove('hide');
+  $("mascotCall").classList.remove('show');
+  localStorage.setItem('mascotHidden', '0');
+  if(withGreeting){
+    mascotSay('ยินดีที่ได้เจอกันอีกนะคะ! ให้หนูช่วยแนะนำที่เที่ยวไหมคะ 💚', true);
+    doWave();
+  }
+}
+function hideMascot(){
+  stopSpeak();
+  $("mascot").classList.add('hide');
+  $("mascotCall").classList.add('show');
+  localStorage.setItem('mascotHidden', '1');
+}
+
+/* ให้น้องโนราห์พูด (ขึ้นข้อความในกล่อง + อ่านออกเสียงถ้าต้องการ) */
+function mascotSay(text, alsoSpeak){
+  $("mascot").classList.remove('hide');
+  $("mascotCall").classList.remove('show');
+  $("mascotText").textContent = text;
+  if(alsoSpeak) speak(text);
+}
+
+/* โบกมือทักทาย / กระโดดดีใจ */
+function doWave(){
+  const m = $("mascot");
+  m.classList.add('waving');
+  setTimeout(() => m.classList.remove('waving'), 2200);
+}
+function doHappy(){
+  const m = $("mascot");
+  m.classList.remove('happy'); void m.offsetWidth; m.classList.add('happy');
+  setTimeout(() => m.classList.remove('happy'), 900);
+}
+
+/* คลิกที่ตัวน้องโนราห์ → ทักทาย + กระโดดน่ารัก ๆ */
+const MASCOT_HELLO = [
+  'สวัสดีค่ะ! หนูชื่อน้องโนราห์ ยินดีต้อนรับสู่เมืองพัทลุงนะคะ',
+  'ชื่อหนูมาจากศิลปะการแสดงโนราห์ ศิลปะประจำถิ่นปักษ์ใต้ของเราค่ะ',
+  'อยากไปเที่ยวไหนดีคะ? ลองกดที่รูปสถานที่ดูสิคะ หนูจะเล่าให้ฟังเอง',
+  'พัทลุงมีทั้งทะเลน้อย ภูเขา น้ำตก และคาเฟ่สวย ๆ เยอะเลยค่ะ',
+  'อย่าลืมกดเช็คอินเก็บประวัติการเดินทางด้วยนะคะ สนุกมากเลย',
+];
+function mascotTap(){
+  doHappy();
+  const msg = MASCOT_HELLO[Math.floor(Math.random() * MASCOT_HELLO.length)];
+  mascotSay(msg, true);
+}
+
+/* 💡 เกร็ดน่ารู้แบบสุ่ม */
+const TIPS = [
+  'เกร็ดน่ารู้ค่ะ ทะเลน้อยเป็นพื้นที่ชุ่มน้ำโลกแห่งแรกของประเทศไทย ช่วงบัวแดงบานสวยที่สุดคือเดือนกุมภาพันธ์ถึงเมษายนค่ะ',
+  'ถ้าอยากถ่ายรูปยอยักษ์ที่ปากประ ต้องไปตั้งแต่ตีห้าครึ่งนะคะ แสงเช้าสวยมากเลย',
+  'เขาอกทะลุเป็นสัญลักษณ์ประจำจังหวัดพัทลุง มีช่องทะลุกลางเขาเป็นเอกลักษณ์ค่ะ',
+  'มาพัทลุงต้องลองข้าวยำกับแกงไตปลานะคะ เป็นอาหารใต้ตำรับดั้งเดิมเลย',
+  'ล่องแก่งหนานมดแดงเหมาะกับครอบครัวมากค่ะ น้ำใสเย็นไหลมาจากเทือกเขาบรรทัด',
+  'หน้าฝนของพัทลุงคือเดือนตุลาคมถึงธันวาคมค่ะ ถ้าจะเที่ยวธรรมชาติแนะนำเดือนมกราคมถึงเมษายนนะคะ',
+];
+function mascotTip(){
+  doHappy();
+  mascotSay(TIPS[Math.floor(Math.random() * TIPS.length)], true);
+}
+
+/* 📖 อ่านรายละเอียดสถานที่ที่กำลังเปิดอยู่ */
+function buildPlaceScript(p){
+  const rs = placeReviews(p.id).length;
+  return `${p.name} ตั้งอยู่ที่ ${p.district || 'จังหวัดพัทลุง'} จังหวัดพัทลุงค่ะ. `
+       + `${p.description || ''} `
+       + `เปิดให้เข้าชม ${p.openHours || 'ไม่ระบุ'} `
+       + `ค่าเข้าชม ${p.fee || 'ไม่ระบุ'} `
+       + `คะแนนความนิยม ${effectiveRating(p).toFixed(1)} จาก 5 ดาว`
+       + (rs ? ` จาก ${rs} รีวิวค่ะ` : 'ค่ะ');
+}
+
+function mascotReadPlace(){
+  const p = state.currentPlace;
+  if(!p){ mascotSay('ลองเลือกสถานที่ที่สนใจก่อนนะคะ แล้วหนูจะอ่านรายละเอียดให้ฟังค่ะ', true); return }
+  localStorage.setItem('autoRead', '1');   /* ครั้งต่อไปอ่านให้อัตโนมัติ */
+  const script = buildPlaceScript(p);
+  mascotSay(script, true);
+  doWave();
+}
+
+/* 🍃 ใบไม้/ผีเสื้อลอยใน Hero (สร้างด้วย JS ไม่ให้ HTML รก) */
+function spawnFloaties(){
+  const hero = document.querySelector('.hero-card');
+  if(!hero) return;
+  const icons = ['🍃','🌸','🦋','✨','🌿'];
+  for(let i = 0; i < 7; i++){
+    const el = document.createElement('span');
+    el.className = 'floaty';
+    el.textContent = icons[i % icons.length];
+    el.style.left = (6 + Math.random() * 88) + '%';
+    el.style.bottom = '-30px';
+    el.style.animationDuration = (9 + Math.random() * 7) + 's';
+    el.style.animationDelay = (Math.random() * 8) + 's';
+    hero.appendChild(el);
+  }
 }
 
 /* ============================================================
@@ -858,15 +1578,79 @@ function go(view){
   }
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   $(view + "-view").classList.add("active");
+  if(view !== 'detail') stopSpeak();   /* ออกจากหน้ารายละเอียด → หยุดอ่าน */
   document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("active", a.dataset.nav === view));
   $("navLinks").classList.remove("open");
   if(view === 'admin') refreshAdmin();
+  if(view === 'about') renderAbout();
   window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+/* ℹ️ เติมตัวเลขสถิติในหน้าเกี่ยวกับเรา */
+function renderAbout(){
+  $("abPlaces").textContent   = DB.get('places').length;
+  $("abServices").textContent = DB.get('services').length;
+  $("abUsers").textContent    = DB.get('users').length;
+  $("abCheckins").textContent = DB.get('checkins').length;
+}
+
+/* 📨 ส่งข้อความจากหน้าติดต่อเรา → เก็บใน DB ให้แอดมินอ่าน */
+function sendMessage(){
+  const name = $("ctName").value.trim();
+  const contact = $("ctContact").value.trim();
+  const msg = $("ctMsg").value.trim();
+  const show = (t, ok) => { const el = $("ctFormMsg"); el.className = 'form-msg' + (t ? (ok ? ' success' : ' error') : ''); el.textContent = t; };
+  if(!name || !msg) return show('กรุณากรอกชื่อและข้อความให้ครบถ้วน');
+
+  const u = currentUser();
+  const list = DB.get('messages');
+  list.push({
+    id: Date.now(),
+    name, contact,
+    message: msg,
+    username: u ? u.username : '(ไม่ได้ล็อกอิน)',
+    date: new Date().toLocaleDateString('th-TH'),
+    time: new Date().toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' }) + ' น.',
+  });
+  DB.set('messages', list);
+  $("ctName").value = ""; $("ctContact").value = ""; $("ctMsg").value = "";
+  show('✅ ส่งข้อความเรียบร้อย ขอบคุณสำหรับความคิดเห็นครับ', true);
+  toast('📩 ส่งข้อความถึงทีมงานแล้ว');
 }
 
 /* ============================================================
    🏠 หน้าแรก: Grid / ค้นหา / กรองหมวด
    ============================================================ */
+/* ⭐ คะแนนที่แสดง = ค่าเฉลี่ยจากรีวิวจริง (ถ้ามี) ไม่งั้นใช้คะแนนตั้งต้น */
+function placeReviews(placeId){ return DB.get('reviews').filter(r => r.placeId === placeId) }
+function effectiveRating(p){
+  const rs = placeReviews(p.id);
+  return rs.length ? rs.reduce((s,r) => s + Number(r.stars||0), 0) / rs.length : Number(p.rating ?? 0);
+}
+function checkinCounts(){
+  const counts = {};
+  DB.get('checkins').forEach(c => counts[c.placeId] = (counts[c.placeId]||0) + 1);
+  return counts;
+}
+
+function placeCardHtml(p, popCount){
+  const fav = isFav(p.id);
+  return `
+    <article class="place-card" onclick="openDetail('${p.id}')">
+      ${popCount ? `<span class="pop-badge">🔥 ${popCount} เช็คอิน</span>` : ""}
+      <button class="fav-btn" title="รายการโปรด" onclick="event.stopPropagation();toggleFav('${p.id}',this)">${fav ? "❤️" : "🤍"}</button>
+      <div class="img-wrap">
+        <img class="place-img" src="${esc(p.mainImage||"")}" alt="${esc(p.name)}" loading="lazy" onerror="this.src=FALLBACK_IMG">
+        <div class="hover-hint">👀 คลิกดูรายละเอียด</div>
+      </div>
+      <div class="place-body">
+        <div class="place-name">${esc(p.name)}</div>
+        <div class="place-district">${esc(p.district||"")}</div>
+        <div class="place-rating"><span class="star">★</span> ${effectiveRating(p).toFixed(1)}</div>
+      </div>
+    </article>`;
+}
+
 function renderPlaces(){
   const grid = $("placesGrid");
   let list = DB.get('places');
@@ -874,16 +1658,36 @@ function renderPlaces(){
   const q = $("searchInput").value.trim();
   if(q) list = list.filter(p => (p.name||"").includes(q) || (p.district||"").includes(q) || (p.category||"").includes(q));
 
-  grid.innerHTML = list.length ? list.map(p => `
-    <article class="place-card" onclick="openDetail('${p.id}')">
-      <img class="place-img" src="${esc(p.mainImage||"")}" alt="${esc(p.name)}" loading="lazy" onerror="this.src=FALLBACK_IMG">
-      <div class="place-body">
-        <div class="place-name">${esc(p.name)}</div>
-        <div class="place-district">${esc(p.district||"")}</div>
-        <div class="place-rating"><span class="star">★</span> ${Number(p.rating??0).toFixed(1)}</div>
-      </div>
-    </article>`).join("")
+  /* 🔃 จัดเรียงตามที่ผู้ใช้เลือก */
+  list = [...list];
+  if(state.sortMode === "rating") list.sort((a,b) => effectiveRating(b) - effectiveRating(a));
+  else if(state.sortMode === "name") list.sort((a,b) => (a.name||"").localeCompare(b.name||"", "th"));
+  else if(state.sortMode === "checkins"){
+    const counts = checkinCounts();
+    list.sort((a,b) => (counts[b.id]||0) - (counts[a.id]||0));
+  }
+
+  grid.innerHTML = list.length ? list.map(p => placeCardHtml(p)).join("")
     : `<div class="empty-note">🌱 ยังไม่พบสถานที่ในเงื่อนไขนี้</div>`;
+
+  renderPopular();
+}
+
+function setSort(v){ state.sortMode = v; renderPlaces(); }
+
+/* 🔥 ส่วนยอดนิยม: สถานที่ที่มีเช็คอินมากสุด 4 อันดับแรก */
+function renderPopular(){
+  const sec = $("popularSection");
+  if(!sec) return;
+  const counts = checkinCounts();
+  const top = DB.get('places')
+    .map(p => ({ ...p, cnt: counts[p.id]||0 }))
+    .filter(p => p.cnt > 0)
+    .sort((a,b) => b.cnt - a.cnt)
+    .slice(0, 4);
+  if(!top.length){ sec.style.display = "none"; return }
+  sec.style.display = "block";
+  $("popularGrid").innerHTML = top.map(p => placeCardHtml(p, p.cnt)).join("");
 }
 
 function filterCategory(cat){
@@ -927,18 +1731,30 @@ function openDetail(id){
   $("dImg").onerror          = function(){ this.src = FALLBACK_IMG };
   $("dName").textContent     = p.name;
   $("dDistrict").textContent = p.district || "-";
-  $("dRating").textContent   = Number(p.rating ?? 0).toFixed(1);
+  $("dRating").textContent   = effectiveRating(p).toFixed(1);
   $("dDesc").textContent     = p.description || "ยังไม่มีคำอธิบาย";
   $("dHours").textContent    = p.openHours || "-";
   $("dFee").textContent      = p.fee || "-";
   $("dPhone").textContent    = p.phone || "-";
 
   updateCheckinCount();
+  updateFavUI();
+  renderReviews(p);
   renderNearbyPlaces(p);
   document.querySelectorAll("#svcFilter .chip").forEach(c => c.classList.toggle("active", c.dataset.type === "all"));
   renderNearbyServices(p);
   renderMap(p);
   go("detail");
+
+  /* 👘 น้องโนราห์โผล่มาแนะนำสถานที่นี้ (ยังไม่อ่านออกเสียงจนกว่าจะกดปุ่ม
+     เพราะเบราว์เซอร์ส่วนใหญ่ห้ามเล่นเสียงเองก่อนผู้ใช้โต้ตอบ) */
+  stopSpeak();
+  if(localStorage.getItem('mascotHidden') !== '1'){
+    mascotSay(`มาถึง ${p.name} แล้วค่ะ! ${(p.description||'').slice(0, 70)}... กดปุ่ม 🔊 ให้หนูอ่านรายละเอียดให้ฟังได้เลยนะคะ`);
+    doWave();
+    /* ถ้าผู้ใช้เคยกดฟังมาก่อน ให้อ่านต่อเนื่องอัตโนมัติได้เลย */
+    if(localStorage.getItem('autoRead') === '1') setTimeout(() => mascotReadPlace(), 500);
+  }
 }
 
 function renderNearbyPlaces(p){
@@ -1213,7 +2029,7 @@ function adminDelCheckin(id){
 
 function setAdminTab(tab){
   state.adminTab = tab;
-  ['places','services','users','checkins'].forEach(t => {
+  ['places','services','users','checkins','messages','reviews'].forEach(t => {
     $("tab-" + t).className = "btn " + (t === tab ? "btn-primary" : "btn-outline");
   });
   refreshAdmin();
@@ -1278,6 +2094,51 @@ function refreshAdmin(){
         <td><button class="btn btn-danger btn-sm" onclick="adminDelCheckin(${c.id})">ลบ</button></td>
       </tr>`).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--text-sub);padding:1.5rem">ยังไม่มีข้อมูลเช็คอิน</td></tr>`;
   }
+
+  if(tab === 'messages'){
+    const list = DB.get('messages').slice().reverse();
+    head.innerHTML = `<tr><th>#</th><th>ชื่อ</th><th>ข้อความ</th><th>ติดต่อกลับ</th><th>บัญชี</th><th>วันที่</th><th>จัดการ</th></tr>`;
+    body.innerHTML = list.length ? list.map((m,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${esc(m.name)}</td>
+        <td style="max-width:260px;white-space:pre-wrap">${esc(m.message)}</td>
+        <td>${esc(m.contact||"-")}</td>
+        <td>${esc(m.username||"-")}</td>
+        <td>${esc(m.date)}<br><small style="color:var(--text-sub)">${esc(m.time)}</small></td>
+        <td><button class="btn btn-danger btn-sm" onclick="adminDelMessage(${m.id})">ลบ</button></td>
+      </tr>`).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--text-sub);padding:1.5rem">ยังไม่มีข้อความจากผู้ใช้</td></tr>`;
+  }
+
+  if(tab === 'reviews'){
+    const list = DB.get('reviews').slice().reverse();
+    head.innerHTML = `<tr><th>#</th><th>ผู้ใช้</th><th>สถานที่</th><th>ดาว</th><th>รีวิว</th><th>วันที่</th><th>จัดการ</th></tr>`;
+    body.innerHTML = list.length ? list.map((r,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>👤 ${esc(r.username)}</td>
+        <td>${esc(r.placeName)}</td>
+        <td style="color:var(--star)">${"★".repeat(Number(r.stars||0))}</td>
+        <td style="max-width:260px;white-space:pre-wrap">${esc(r.text)}</td>
+        <td>${esc(r.date||"-")}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="adminDelReview(${r.id})">ลบ</button></td>
+      </tr>`).join("") : `<tr><td colspan="7" style="text-align:center;color:var(--text-sub);padding:1.5rem">ยังไม่มีรีวิว</td></tr>`;
+  }
+}
+
+/* 💬 ลบรีวิว */
+function adminDelReview(id){
+  if(!confirm('ยืนยันการลบรีวิวนี้?')) return;
+  DB.set('reviews', DB.get('reviews').filter(r => r.id !== id));
+  renderPlaces();
+  refreshAdmin();
+}
+
+/* 📨 ลบข้อความติดต่อ */
+function adminDelMessage(id){
+  if(!confirm('ยืนยันการลบข้อความนี้?')) return;
+  DB.set('messages', DB.get('messages').filter(m => m.id !== id));
+  refreshAdmin();
 }
 
 /* ============================================================
@@ -1286,7 +2147,30 @@ function refreshAdmin(){
 initData();
 renderUserBox();
 onKindChange();
+buildStarsInput();
+spawnFloaties();                      /* 🍃 ใบไม้/ผีเสื้อลอยใน Hero */
 $("searchInput").addEventListener("input", renderPlaces);
+
+/* 👘 น้องโนราห์ทักทายตอนเข้าเว็บ (ถ้าไม่ได้ถูกซ่อนไว้) */
+setTimeout(() => {
+  if(localStorage.getItem('mascotHidden') === '1'){
+    $("mascotCall").classList.add('show');
+  } else {
+    $("mascot").classList.remove('hide');
+    const u = currentUser();
+    mascotSay(u ? `สวัสดีค่ะคุณ ${u.username}! วันนี้อยากไปเที่ยวไหนดีคะ 💚`
+                : 'สวัสดีค่ะ! หนูชื่อน้องโนราห์ ผู้ช่วยนำเที่ยวเมืองพัทลุง กดที่รูปสถานที่เพื่อดูรายละเอียด แล้วหนูจะอ่านให้ฟังนะคะ 💚');
+    doWave();
+  }
+}, 1200);
+
+/* ↑ ปุ่มกลับขึ้นบนสุด: โผล่เมื่อเลื่อนลงมาเกิน 400px */
+window.addEventListener("scroll", () => {
+  $("backTop").classList.toggle("show", window.scrollY > 400);
+});
+/* ปิดเสียงเมื่อออกจากหน้าเว็บ */
+window.addEventListener("beforeunload", () => { if(synth) synth.cancel(); });
+
 renderPlaces();                       /* วาดทันที (โหมดออฟไลน์ / แคชเดิม) */
 whenReady(() => renderPlaces());      /* วาดอีกครั้งเมื่อข้อมูล Firebase ก้อนแรกมาถึง */
 </script>
