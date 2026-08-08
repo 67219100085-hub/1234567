@@ -1114,23 +1114,41 @@ function initData(){
     setConnStatus('กำลังเชื่อมต่อ Firebase…');
 
     KEYS.forEach(key => {
-      fdb.ref(key).on('value', snap => {
-        const v = snap.val();
-        cache[key] = v ? (Array.isArray(v) ? v.filter(Boolean) : Object.values(v)) : [];
-        /* DB ว่าง (เพิ่งสร้างโปรเจกต์) → seed ข้อมูลตัวอย่างครั้งเดียว */
-        if(key === 'places' && cache.places.length === 0 && !initData._seededP){
-          initData._seededP = true; fdb.ref('places').set(DEFAULT_PLACES);
+      fdb.ref(key).on('value',
+        snap => {
+          const v = snap.val();
+          cache[key] = v ? (Array.isArray(v) ? v.filter(Boolean) : Object.values(v)) : [];
+          /* DB ว่าง (เพิ่งสร้างโปรเจกต์) → seed ข้อมูลตัวอย่างครั้งเดียว */
+          if(key === 'places' && cache.places.length === 0 && !initData._seededP){
+            initData._seededP = true; fdb.ref('places').set(DEFAULT_PLACES);
+          }
+          if(key === 'services' && cache.services.length === 0 && !initData._seededS){
+            initData._seededS = true; fdb.ref('services').set(DEFAULT_SERVICES);
+          }
+          if(key === 'places') markReady();
+          onDataChanged(key);
+        },
+        /* ⚠️ อ่านข้อมูลไม่ได้ (ส่วนใหญ่คือ Rules ยังเป็น false) → ใช้ข้อมูลตัวอย่างแทน
+           เว็บจะยังใช้งานดูได้ ไม่ขาวโล่ง */
+        err => {
+          console.error('Firebase read error [' + key + ']:', err && err.code, err && err.message);
+          useOfflineFallback(err && err.code === 'PERMISSION_DENIED'
+            ? '⚠️ Firebase ปฏิเสธการเข้าถึง — กรุณาตั้ง Rules เป็น true (ดูวิธีในคอนโซล)'
+            : '⚠️ เชื่อมต่อฐานข้อมูลไม่ได้ — กำลังแสดงข้อมูลตัวอย่าง');
         }
-        if(key === 'services' && cache.services.length === 0 && !initData._seededS){
-          initData._seededS = true; fdb.ref('services').set(DEFAULT_SERVICES);
-        }
-        if(key === 'places') markReady();
-        onDataChanged(key);
-      });
+      );
     });
 
+    /* ⏱️ กันเหนียว: ถ้าเกิน 6 วินาทีแล้วยังไม่มีข้อมูลเข้ามาเลย ให้ใช้ข้อมูลตัวอย่างไปก่อน */
+    setTimeout(() => {
+      if(!_ready || !DB.get('places').length){
+        useOfflineFallback('⚠️ ยังไม่ได้รับข้อมูลจาก Firebase — กำลังแสดงข้อมูลตัวอย่าง');
+      }
+    }, 6000);
+
     fdb.ref('.info/connected').on('value', s => {
-      setConnStatus(s.val() ? 'เชื่อมต่อ Firebase แล้ว ☁️' : 'หลุดการเชื่อมต่อ กำลังลองใหม่…');
+      if(!initData._fallback)
+        setConnStatus(s.val() ? 'เชื่อมต่อ Firebase แล้ว ☁️' : 'หลุดการเชื่อมต่อ กำลังลองใหม่…');
     });
     return;
   }
@@ -1148,6 +1166,20 @@ function initData(){
   if(!localStorage.getItem('favorites')) DB.set('favorites', []);
   setConnStatus('โหมดออฟไลน์ (localStorage)');
   markReady();
+}
+
+/* 🛟 ใช้ข้อมูลตัวอย่างเมื่อ Firebase ใช้งานไม่ได้ (เรียกซ้ำได้ ไม่ทำงานซ้ำซ้อน) */
+function useOfflineFallback(msg){
+  if(initData._fallback) return;
+  initData._fallback = true;
+  if(!cache.places || !cache.places.length)   cache.places = [...DEFAULT_PLACES];
+  if(!cache.services || !cache.services.length) cache.services = [...DEFAULT_SERVICES];
+  ['users','checkins','messages','reviews','favorites'].forEach(k => { if(!cache[k]) cache[k] = [] });
+  setConnStatus(msg);
+  markReady();
+  renderPlaces();
+  refreshAdmin();
+  console.warn('%c🔧 วิธีแก้: Firebase Console → Realtime Database → Rules → ใส่\n{ "rules": { ".read": true, ".write": true } }\nแล้วกด Publish', 'color:#1b4332;font-weight:bold');
 }
 
 /* ============================================================
@@ -1445,7 +1477,8 @@ const LANGS = [
   { code:'fr-FR', key:'fr', flag:'🇫🇷', label:'Français' },
 ];
 let curLang = localStorage.getItem('voiceLang') || 'th';
-const L = () => LANGS.find(l => l.key === curLang) || LANGS[0];
+/* ⚠️ ห้ามตั้งชื่อตัวแปรว่า L เพราะชนกับ L ของ Leaflet (แผนที่) แล้วสคริปต์จะพังทั้งไฟล์ */
+const curLangObj = () => LANGS.find(l => l.key === curLang) || LANGS[0];
 
 /* ชื่ออำเภอในภาษาอังกฤษ (ใช้กับทุกภาษาที่ไม่ใช่ไทย) */
 const DISTRICT_EN = {
@@ -1581,7 +1614,8 @@ function loadVoices(){
   voices = synth.getVoices() || [];
   renderLangUI();
 }
-if(synth){ loadVoices(); synth.onvoiceschanged = loadVoices; }
+/* หมายเหตุ: เรียก loadVoices() ตอนท้ายไฟล์ เพื่อไม่ให้ใช้ตัวแปรก่อนถูกประกาศ */
+if(synth) synth.onvoiceschanged = loadVoices;
 
 /* หาเสียงที่ตรงกับภาษาที่เลือกที่สุด */
 function voiceFor(code){
@@ -1591,7 +1625,7 @@ function voiceFor(code){
       || voices.find(v => (v.lang||'').replace('_','-').toLowerCase().startsWith(base))
       || null;
 }
-const hasVoice = (code) => !!voiceFor(code);
+function hasVoice(code){ return !!voiceFor(code) }
 
 /* วาดปุ่มเลือกภาษา (ทั้งในกล่องคำพูดและ dropdown หน้ารายละเอียด) */
 function renderLangUI(){
@@ -1608,7 +1642,7 @@ function renderLangUI(){
       `<option value="${l.key}"${l.key === curLang ? ' selected' : ''}>${l.flag} ${l.label}${hasVoice(l.code) ? '' : ' ⚠️'}</option>`).join('');
   }
   const note = $("langNote");
-  if(note) note.textContent = hasVoice(L().code) ? '' : T('novoice');
+  if(note) note.textContent = hasVoice(curLangObj().code) ? '' : T('novoice');
   const b = $("btnSpeakDetail");
   if(b) b.textContent = T('read');
 }
@@ -1630,7 +1664,7 @@ function setLang(key, announce){
 function speak(text, langCode){
   if(!text) return;
   if(!synth){ toast('⚠️ เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง'); return }
-  const code = langCode || L().code;
+  const code = langCode || curLangObj().code;
   synth.cancel();                       /* หยุดข้อความเดิมก่อนเสมอ */
   const utt = new SpeechSynthesisUtterance(text);
   utt.lang = code;
@@ -1837,7 +1871,11 @@ function renderPlaces(){
   }
 
   grid.innerHTML = list.length ? list.map(p => placeCardHtml(p)).join("")
-    : `<div class="empty-note">🌱 ยังไม่พบสถานที่ในเงื่อนไขนี้</div>`;
+    : (DB.get('places').length
+        ? `<div class="empty-note">🌱 ยังไม่พบสถานที่ในเงื่อนไขนี้<br><small>ลองเปลี่ยนคำค้นหา หรือกดหมวดหมู่ซ้ำเพื่อยกเลิกตัวกรอง</small></div>`
+        : `<div class="empty-note">⏳ กำลังโหลดข้อมูลสถานที่...<br>
+             <small>ถ้าค้างนาน แปลว่าเชื่อมต่อฐานข้อมูลไม่ได้ — ตรวจสอบ Firebase Console → Realtime Database → Rules<br>
+             ให้ตั้งเป็น <code>{ "rules": { ".read": true, ".write": true } }</code> แล้วกด Publish</small></div>`);
 
   renderPopular();
 }
@@ -1988,7 +2026,7 @@ function filterService(type){
 /* ============================================================
    🗺️ แผนที่ Leaflet + OpenStreetMap (ใช้งานได้จริง)
    ============================================================ */
-let map = null, markerLayer = null;
+let gmap = null, markerLayer = null;
 
 function emojiPin(emoji, isMain=false){
   return L.divIcon({
@@ -2018,14 +2056,14 @@ function renderMap(p){
     ? `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.name + " พัทลุง")}`;
 
-  if(!map){
-    map = L.map("mapCanvas", { scrollWheelZoom:false });
-    map.on("click", () => map.scrollWheelZoom.enable());
+  if(!gmap){
+    gmap = L.map("mapCanvas", { scrollWheelZoom:false });
+    gmap.on("click", () => gmap.scrollWheelZoom.enable());
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom:19,
       attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
-    markerLayer = L.layerGroup().addTo(map);
+    }).addTo(gmap);
+    markerLayer = L.layerGroup().addTo(gmap);
   }
 
   markerLayer.clearLayers();
@@ -2063,14 +2101,14 @@ function renderMap(p){
       bounds.push([s.lat, s.lng]);
     });
 
-  if(bounds.length > 1) map.fitBounds(bounds, { padding:[45,45], maxZoom:14 });
-  else map.setView(center, 14);
+  if(bounds.length > 1) gmap.fitBounds(bounds, { padding:[45,45], maxZoom:14 });
+  else gmap.setView(center, 14);
 
   /* detail-view เพิ่งโผล่จาก display:none → ให้ Leaflet คำนวณขนาดใหม่ */
   setTimeout(() => {
-    map.invalidateSize();
-    if(bounds.length > 1) map.fitBounds(bounds, { padding:[45,45], maxZoom:14 });
-    else map.setView(center, 14);
+    gmap.invalidateSize();
+    if(bounds.length > 1) gmap.fitBounds(bounds, { padding:[45,45], maxZoom:14 });
+    else gmap.setView(center, 14);
   }, 350);
 }
 
@@ -2328,6 +2366,7 @@ renderUserBox();
 onKindChange();
 buildStarsInput();
 spawnFloaties();                      /* 🍃 ใบไม้/ผีเสื้อลอยใน Hero */
+loadVoices();                         /* 🔊 โหลดรายชื่อเสียงในเครื่อง */
 renderLangUI();                       /* 🌐 วาดปุ่มเลือกภาษา */
 $("searchInput").addEventListener("input", renderPlaces);
 
