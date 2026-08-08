@@ -939,6 +939,7 @@ footer{padding:0;text-align:left}
     </div>
     <!-- 🌐 เลือกภาษาที่ให้น้องโนราห์อ่าน -->
     <div class="lang-row" id="langRow"></div>
+    <select class="lang-select" id="voiceSelect" style="width:100%;margin-top:.45rem;font-size:.78rem;padding:.35rem .7rem" onchange="setVoiceMode(this.value)"></select>
     <div class="lang-note" id="langNote"></div>
   </div>
 </div>
@@ -1614,18 +1615,34 @@ function loadVoices(){
   voices = synth.getVoices() || [];
   renderLangUI();
 }
+/* Chrome/Edge มักคืนรายชื่อเสียงเป็นค่าว่างในครั้งแรก → ลองซ้ำจนกว่าจะได้ */
+function retryLoadVoices(times = 8){
+  if(!synth || times <= 0) return;
+  loadVoices();
+  if(!voices.length) setTimeout(() => retryLoadVoices(times - 1), 400);
+}
 /* หมายเหตุ: เรียก loadVoices() ตอนท้ายไฟล์ เพื่อไม่ให้ใช้ตัวแปรก่อนถูกประกาศ */
 if(synth) synth.onvoiceschanged = loadVoices;
 
 /* หาเสียงที่ตรงกับภาษาที่เลือกที่สุด */
 function voiceFor(code){
   if(!voices.length) return null;
+  /* ถ้าผู้ใช้เลือกเสียงเองไว้ ให้ใช้เสียงนั้นก่อน */
+  const pinned = localStorage.getItem('voiceName');
+  if(pinned){
+    const v = voices.find(v => v.name === pinned);
+    if(v) return v;
+  }
   const base = code.split('-')[0].toLowerCase();
   return voices.find(v => v.lang.replace('_','-').toLowerCase() === code.toLowerCase())
       || voices.find(v => (v.lang||'').replace('_','-').toLowerCase().startsWith(base))
       || null;
 }
-function hasVoice(code){ return !!voiceFor(code) }
+function hasVoice(code){
+  if(!voices.length) return false;
+  const base = code.split('-')[0].toLowerCase();
+  return voices.some(v => (v.lang||'').replace('_','-').toLowerCase().startsWith(base));
+}
 
 /* วาดปุ่มเลือกภาษา (ทั้งในกล่องคำพูดและ dropdown หน้ารายละเอียด) */
 function renderLangUI(){
@@ -1641,8 +1658,28 @@ function renderLangUI(){
     sel.innerHTML = LANGS.map(l =>
       `<option value="${l.key}"${l.key === curLang ? ' selected' : ''}>${l.flag} ${l.label}${hasVoice(l.code) ? '' : ' ⚠️'}</option>`).join('');
   }
+  /* 🔊 โหมดเสียง: ออนไลน์ (ไม่ต้องติดตั้ง) หรือ เสียงในเครื่อง */
+  const vsel = $("voiceSelect");
+  if(vsel){
+    const online = useOnlineVoice();
+    const devN = voices.length;
+    vsel.innerHTML =
+      `<option value="online"${online ? ' selected' : ''}>🌐 เสียงออนไลน์ (ใช้ได้ทันที ไม่ต้องติดตั้ง)</option>` +
+      `<option value="device"${online ? '' : ' selected'}>📱 เสียงในเครื่อง${devN ? ' (' + devN + ' เสียง)' : ' (ไม่พบเสียง)'}</option>`;
+  }
+
   const note = $("langNote");
-  if(note) note.textContent = hasVoice(curLangObj().code) ? '' : T('novoice');
+  if(note){
+    if(useOnlineVoice()){
+      note.textContent = '💡 โหมดออนไลน์ต้องต่ออินเทอร์เน็ต ถ้าเสียงไม่ออกให้ลองสลับเป็นเสียงในเครื่อง';
+    } else if(!voices.length){
+      note.textContent = '⏳ กำลังโหลดเสียงในเครื่อง... ถ้าไม่พบ ให้สลับกลับไปใช้เสียงออนไลน์นะคะ';
+    } else if(!hasVoice(curLangObj().code)){
+      note.innerHTML = '⚠️ เครื่องนี้ไม่มีเสียงภาษานี้ — แนะนำให้เลือก 🌐 เสียงออนไลน์ด้านบน';
+    } else {
+      note.textContent = '';
+    }
+  }
   const b = $("btnSpeakDetail");
   if(b) b.textContent = T('read');
 }
@@ -1660,27 +1697,127 @@ function setLang(key, announce){
   }
 }
 
-/* พูดข้อความ + ให้น้องโนราห์ขยับปากและโบกมือไปด้วย */
-function speak(text, langCode){
-  if(!text) return;
-  if(!synth){ toast('⚠️ เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง'); return }
+/* ============================================================
+   🔊 ระบบเสียง 2 ชั้น
+   ชั้นที่ 1 (ค่าเริ่มต้น): เสียงออนไลน์ — ดึงไฟล์เสียงจากอินเทอร์เน็ตมาเล่น
+                            ใช้ได้ทุกเครื่องทันที ไม่ต้องติดตั้งเสียงใด ๆ
+   ชั้นที่ 2 (สำรอง): เสียงในเครื่อง (Web Speech API) ใช้เมื่อออฟไลน์หรือโหลดเสียงไม่ได้
+   ============================================================ */
+const TTS_LANG = { th:'th', en:'en', zh:'zh-CN', ja:'ja', ko:'ko', fr:'fr' };
+let audioQueue = [], audioIdx = 0, curAudio = null, onlineFailed = false;
+const useOnlineVoice = () => localStorage.getItem('voiceMode') !== 'device';
+
+/* ตัดข้อความยาวเป็นท่อน ๆ (บริการเสียงรับได้ครั้งละ ~200 ตัวอักษร)
+   หมายเหตุ: ตั้งใจไม่ใช้ regex lookbehind เพราะ Safari รุ่นเก่าจะพังทั้งไฟล์
+   และไม่ตัดตรงจุดของ "อ.ควนขนุน" หรือ "4.8" ให้เสียงอ่านเพี้ยน */
+function chunkText(text, size = 180){
+  const s = String(text).replace(/\s+/g, ' ').trim();
+  const sents = []; let cur = '';
+  for(let i = 0; i < s.length; i++){
+    cur += s[i];
+    const c = s[i], nxt = s[i + 1];
+    /* จบประโยคเมื่อเจอเครื่องหมายจบ และตัวถัดไปเป็นช่องว่างหรือหมดข้อความ */
+    if('。！？…'.includes(c) || ('.!?'.includes(c) && (nxt === undefined || nxt === ' '))){
+      sents.push(cur); cur = '';
+    }
+  }
+  if(cur) sents.push(cur);
+
+  const out = []; let buf = '';
+  for(let sen of sents){
+    sen = sen.trim();
+    if(sen.length > size && buf){ out.push(buf.trim()); buf = '' }   /* เทของค้างก่อน */
+    while(sen.length > size){                   /* ประโยคเดียวยาวเกิน → ตัดตรงช่องว่างที่ใกล้ที่สุด */
+      let cut = sen.lastIndexOf(' ', size);
+      if(cut < size * 0.5) cut = size;
+      out.push(sen.slice(0, cut).trim());
+      sen = sen.slice(cut).trim();
+    }
+    if(!sen) continue;
+    if((buf + ' ' + sen).trim().length > size){ if(buf) out.push(buf.trim()); buf = sen }
+    else buf = (buf ? buf + ' ' : '') + sen;
+  }
+  if(buf.trim()) out.push(buf.trim());
+  return out.length ? out : [s.slice(0, size)];
+}
+
+function ttsUrl(text, tl){
+  return 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob'
+       + '&tl=' + encodeURIComponent(tl) + '&q=' + encodeURIComponent(text);
+}
+
+/* เล่นเสียงออนไลน์ทีละท่อนต่อกัน */
+function playOnline(text, key){
+  const tl = TTS_LANG[key] || 'th';
+  audioQueue = chunkText(text).map(t => ttsUrl(t, tl));
+  audioIdx = 0;
+  setTalking(true);
+  playNextChunk();
+}
+
+function playNextChunk(){
+  if(audioIdx >= audioQueue.length){ setTalking(false); curAudio = null; return }
+  const a = new Audio(audioQueue[audioIdx++]);
+  curAudio = a;
+  a.onended = () => { if(curAudio === a) playNextChunk() };
+  a.onerror = () => {
+    /* โหลดเสียงออนไลน์ไม่ได้ (เช่น ไม่มีเน็ต) → สลับไปใช้เสียงในเครื่องแทน */
+    if(!onlineFailed){
+      onlineFailed = true;
+      console.warn('เสียงออนไลน์ใช้ไม่ได้ → สลับไปใช้เสียงในเครื่อง');
+      const txt = $("mascotText").textContent;
+      setTalking(false);
+      speakDevice(txt);
+    } else setTalking(false);
+  };
+  a.play().catch(() => {
+    /* บางเบราว์เซอร์ต้องให้ผู้ใช้กดปุ่มก่อนถึงเล่นเสียงได้ */
+    setTalking(false);
+    toast('🔇 กดปุ่ม 🔊 อีกครั้งเพื่อเริ่มเสียงนะคะ');
+  });
+}
+
+/* เสียงในเครื่อง (สำรอง) */
+function speakDevice(text, langCode){
+  if(!synth) { toast('⚠️ อุปกรณ์นี้เล่นเสียงไม่ได้'); return }
   const code = langCode || curLangObj().code;
-  synth.cancel();                       /* หยุดข้อความเดิมก่อนเสมอ */
+  const v = voiceFor(code);
+  synth.cancel();
   const utt = new SpeechSynthesisUtterance(text);
   utt.lang = code;
-  const v = voiceFor(code);
   if(v) utt.voice = v;
-  utt.rate  = 0.96;                     /* ช้าลงนิดให้ฟังชัด */
-  utt.pitch = 1.15;                     /* เสียงสูงนิด ๆ ให้น่ารัก */
+  utt.rate = 0.96; utt.pitch = 1.15;
   utt.onstart = () => setTalking(true);
   utt.onend   = () => setTalking(false);
   utt.onerror = () => setTalking(false);
   synth.speak(utt);
 }
 
+/* 🔊 ฟังก์ชันหลักที่ทุกที่เรียกใช้ */
+function speak(text, langCode){
+  if(!text) return;
+  stopSpeak();
+  const key = curLang;
+  if(useOnlineVoice() && !onlineFailed) playOnline(text, key);
+  else speakDevice(text, langCode);
+}
+
 function stopSpeak(){
   if(synth) synth.cancel();
+  audioQueue = []; audioIdx = 0;
+  if(curAudio){ curAudio.pause(); curAudio.onended = null; curAudio.onerror = null; curAudio = null }
   setTalking(false);
+}
+
+/* สลับโหมดเสียง ออนไลน์ ↔ ในเครื่อง */
+function setVoiceMode(mode){
+  localStorage.setItem('voiceMode', mode);
+  onlineFailed = false;
+  stopSpeak();
+  renderLangUI();
+  const demo = { th:'สวัสดีค่ะ หนูชื่อน้องโนราห์', en:'Hello, my name is Nora.', zh:'你好，我叫诺拉。',
+                 ja:'こんにちは、ノーラーです。', ko:'안녕하세요, 노라입니다.', fr:'Bonjour, je m\'appelle Nora.' }[curLang];
+  speak(demo);
 }
 
 function setTalking(on){
@@ -2366,7 +2503,7 @@ renderUserBox();
 onKindChange();
 buildStarsInput();
 spawnFloaties();                      /* 🍃 ใบไม้/ผีเสื้อลอยใน Hero */
-loadVoices();                         /* 🔊 โหลดรายชื่อเสียงในเครื่อง */
+retryLoadVoices();                    /* 🔊 โหลดรายชื่อเสียง (ลองซ้ำจนกว่าจะได้) */
 renderLangUI();                       /* 🌐 วาดปุ่มเลือกภาษา */
 $("searchInput").addEventListener("input", renderPlaces);
 
